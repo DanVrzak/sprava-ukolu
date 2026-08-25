@@ -1,201 +1,145 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="cs">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    body {background-color: #eef2f7}
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; color: #0d121f; -webkit-text-stroke: #0d121f}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; color: #0d121f; -webkit-text-stroke: #0d121f; min-height: 15.0px}
-    span.s1 {font-kerning: none}
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provozní deník údržby</title>
+  
+  <!-- Tailwind CSS pro stylování -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="cs"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;Kolo Štěstí&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>* {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0f172a;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #f8fafc;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>flex-direction: column;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>min-height: 100vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>h1 {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 2rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #38bdf8;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.wheel-container {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 320px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 320px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 30px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.pointer {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>top: -10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>left: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translateX(-50%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-left: 15px solid transparent;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-right: 15px solid transparent;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-top: 25px solid #ef4444;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>z-index: 10;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>canvas {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: transform 4s cubic-bezier(0.15, 0.99, 0.35, 1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0284c7;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: white;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 12px 28px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1.1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: bold;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: background 0.2s, transform 0.1s;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button:hover {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0369a1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button:active {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: scale(0.96);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button:disabled {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #475569;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: not-allowed;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.result {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1.3rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: bold;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>min-height: 30px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #4ade80;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;h1&gt;Kolo Štěstí&lt;/h1&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="wheel-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="pointer"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;canvas id="wheel" width="400" height="400"&gt;&lt;/canvas&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;button id="spin-btn"&gt;Zatočit kolem!&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="result" id="result"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const items = ['Úkol 1', 'Úkol 2', 'Úkol 3', 'Úkol 4', 'Úkol 5', 'Úkol 6'];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const colors = ['#f43f5e', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899'];</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const canvas = document.getElementById('wheel');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const ctx = canvas.getContext('2d');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const spinBtn = document.getElementById('spin-btn');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const resultDiv = document.getElementById('result');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const numItems = items.length;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const arcSize = (2 * Math.PI) / numItems;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let currentRotation = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let isSpinning = false;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Vykreslení kola</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function drawWheel() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const centerX = canvas.width / 2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const centerY = canvas.height / 2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const radius = canvas.width / 2 - 10;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>for (let i = 0; i &lt; numItems; i++) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const angle = i * arcSize;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Výseč</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.beginPath();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fillStyle = colors[i % colors.length];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.moveTo(centerX, centerY);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.arc(centerX, centerY, radius, angle, angle + arcSize);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.lineTo(centerX, centerY);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fill();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.stroke();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Text</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.save();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fillStyle = '#ffffff';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.font = 'bold 18px sans-serif';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.translate(centerX, centerY);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.rotate(angle + arcSize / 2);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.textAlign = 'right';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fillText(items[i], radius - 20, 6);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.restore();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Zatočení kolem</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>spinBtn.addEventListener('click', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (isSpinning) return;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">      </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>isSpinning = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>spinBtn.disabled = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>resultDiv.textContent = '';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// Náhodné otočení (min 5 plných otáček + náhodný úhel)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const extraDegrees = Math.floor(Math.random() * 360) + 1800;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>currentRotation += extraDegrees;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>canvas.style.transform = `rotate(${currentRotation}deg)`;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// Vyhodnocení výhry po dokončení animace (4s)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>isSpinning = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>spinBtn.disabled = false;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const actualDegrees = currentRotation % 360;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Šipka ukazuje nahoru (270 stupňů v Canvas souřadnicích)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const effectiveAngle = (360 - (actualDegrees % 360) + 270) % 360;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const selectedIndex = Math.floor(effectiveAngle / (360 / numItems));</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>resultDiv.textContent = `Padlo: ${items[selectedIndex]}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}, 4000);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>drawWheel();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<body class="bg-[#1B1E21] text-[#ECECEA]">
+  <div id="root"></div>
+
+  <script>
+    const { useState, useEffect, useMemo, createElement: e } = React;
+
+    // Barvy
+    const C = {
+      bg: "#1B1E21", panel: "#24282C", panelAlt: "#2E3338", border: "#3A3F44",
+      amber: "#F2A93B", green: "#5FB77E", red: "#E2694B", text: "#ECECEA", muted: "#9AA0A6"
+    };
+
+    const SEED_TASKS = [
+      { id: "v1", name: "Větrání teepee / jurty", category: "indoor", months: [3, 4, 5, 6, 7, 8], interval: 1, notes: "KOM a Školní prostor", lastDone: null },
+      { id: "v2", name: "Zalévání záhonů a keřů", category: "outdoor", months: [3, 4, 5, 6, 7, 8], interval: 3, notes: "Šafrán, KOM, Školní", lastDone: null },
+      { id: "v3", name: "Sekání trávy", category: "outdoor", months: [3, 4, 5, 9, 10, 11], interval: 14, notes: "Všechny exteriéry", lastDone: null }
+    ];
+
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function daysBetween(a, b) { return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000); }
+    function isDue(task, today) { return !task.lastDone || daysBetween(task.lastDone, today) >= task.interval; }
+
+    function storageGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+    function storageSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+
+    function App() {
+      const [tasks, setTasks] = useState([]);
+      const [weather, setWeather] = useState({ date: todayStr(), isRaining: false });
+      const [extra, setExtra] = useState([]);
+      const [newExtraText, setNewExtraText] = useState("");
+
+      useEffect(() => {
+        setTasks(storageGet("tasks-catalog") || SEED_TASKS);
+        setWeather(storageGet("weather-state") || { date: todayStr(), isRaining: false });
+        setExtra(storageGet("extra-tasks") || []);
+      }, []);
+
+      const today = todayStr();
+      const month = new Date().getMonth() + 1;
+
+      const due = useMemo(() => tasks.filter(t => (!t.months.length || t.months.includes(month)) && isDue(t, today)), [tasks, month, today]);
+      const dueIndoor = due.filter(t => t.category === "indoor");
+      const dueOutdoor = weather.isRaining ? [] : due.filter(t => t.category === "outdoor");
+      const outdoorBlocked = weather.isRaining ? due.filter(t => t.category === "outdoor") : [];
+
+      function toggleTask(id) {
+        const updated = tasks.map(t => t.id === id ? { ...t, lastDone: t.lastDone === today ? null : today } : t);
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function toggleRain() {
+        const next = { date: today, isRaining: !weather.isRaining };
+        setWeather(next);
+        storageSet("weather-state", next);
+      }
+
+      function addExtra() {
+        if (!newExtraText.trim()) return;
+        const updated = [...extra, { id: "e-" + Date.now(), name: newExtraText, done: false }];
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+        setNewExtraText("");
+      }
+
+      function toggleExtra(id) {
+        const updated = extra.map(e => e.id === id ? { ...e, done: !e.done } : e);
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      return e("div", { className: "max-w-xl mx-auto p-4 font-sans" },
+        // Hlavička
+        e("div", { className: "flex justify-between items-center mb-6" },
+          e("h1", { className: "text-xl font-bold uppercase text-[#F2A93B]" }, "Provozní deník údržby"),
+          e("button", { onClick: toggleRain, className: "px-3 py-1.5 rounded-lg border text-sm font-semibold flex items-center gap-2", style: { borderColor: weather.isRaining ? C.red : C.border, color: weather.isRaining ? C.red : C.text } },
+            weather.isRaining ? "🌧️ Dnes prší" : "☀️ Dnes je sucho"
+          )
+        ),
+
+        // Varování při dešti
+        outdoorBlocked.length > 0 && e("div", { className: "p-3 rounded-xl mb-4 bg-red-900/20 border border-red-500/30 text-red-400 text-sm" },
+          `Odloženo kvůli dešti: ${outdoorBlocked.map(t => t.name).join(", ")}`
+        ),
+
+        // Vnitřní úkoly
+        e("div", { className: "mb-6" },
+          e("h2", { className: "text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider" }, "Vnitřní úkoly"),
+          dueIndoor.map(t => e("div", { key: t.id, onClick: () => toggleTask(t.id), className: "flex items-center gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },
+            e("span", null, t.lastDone === today ? "✅" : "⚪"),
+            e("span", { className: t.lastDone === today ? "line-through text-gray-500" : "" }, t.name)
+          ))
+        ),
+
+        // Venkovní úkoly
+        e("div", { className: "mb-6" },
+          e("h2", { className: "text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider" }, "Venkovní úkoly"),
+          dueOutdoor.map(t => e("div", { key: t.id, onClick: () => toggleTask(t.id), className: "flex items-center gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },
+            e("span", null, t.lastDone === today ? "✅" : "⚪"),
+            e("span", { className: t.lastDone === today ? "line-through text-gray-500" : "" }, t.name)
+          ))
+        ),
+
+        // Mimořádné úkoly
+        e("div", null,
+          e("h2", { className: "text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider" }, "Mimořádné úkoly"),
+          extra.map(ex => e("div", { key: ex.id, onClick: () => toggleExtra(ex.id), className: "flex items-center gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },
+            e("span", null, ex.done ? "✅" : "⚪"),
+            e("span", { className: ex.done ? "line-through text-gray-500" : "" }, ex.name)
+          )),
+          e("div", { className: "flex gap-2 mt-3" },
+            e("input", {
+              value: newExtraText,
+              onChange: (evt) => setNewExtraText(evt.target.value),
+              placeholder: "Přidat úkol…",
+              className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none"
+            }),
+            e("button", { onClick: addExtra, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm" }, "+")
+          )
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(App));
+  </script>
 </body>
 </html>
