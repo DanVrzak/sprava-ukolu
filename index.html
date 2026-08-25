@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provozní deník údržby</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+</head>
+<body class="bg-[#1B1E21] text-[#ECECEA] antialiased">
+  <div id="root"></div>
+
+  <script>
+    const { useState, useEffect, useMemo, createElement: e } = React;
+
+    // ---------- BAREVNÉ SCHÉMA A OBJEKTY ----------
+    const AREAS = [
+      { id: "safran", label: "Šafrán", color: "#8B5FBF" },
+      { id: "komunitni", label: "Komunitní prostor", color: "#3B5BA5" },
+      { id: "skolni", label: "Školní prostor", color: "#2E8B7D" },
+      { id: "byty", label: "Byty", color: "#6B6B6B" },
+      { id: "hrastice", label: "Chata Hraštice", color: "#C24B4B" },
+      { id: "vrchlabi", label: "Vrchlabí 172", color: "#9A8B3F" }
+    ];
+
+    const SEED_TASKS = [
+      { id: "v1", name: "Větrání teepee / jurty", category: "indoor", areas: ["komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 1, notes: "Konkrétně: KOM prostor; Školní prostor, Jurta", lastDone: null },
+      { id: "v2", name: "Zalévání záhonů, květin, stromků, keřů", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 3, notes: "Šafrán exteriér, KOM, Školní prostor", lastDone: null },
+      { id: "v3", name: "Sekání trávy", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5, 9, 10, 11], interval: 14, notes: "Šafrán, KOM, Školní prostor", lastDone: null },
+      { id: "v4", name: "Odzimování, úklid po zimě (hrabání, hnojení)", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Jarní úklid pozemku", lastDone: null },
+      { id: "v5", name: "Kontrola stavu po zimě + soupis potřebných oprav", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Výstup jde do backlogu oprav", lastDone: null },
+      { id: "v6", name: "Otevření a kontrola venkovní vody, napojení hadic", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Předletní příprava vody", lastDone: null },
+      { id: "v7", name: "Kontrola nářadí a vybavení", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Revize funkčnosti strojů a nářadí", lastDone: null },
+      { id: "v8", name: "Kontrola hřiště a herních prvků po zimě", category: "outdoor", areas: ["safran", "skolni"], months: [3, 4, 5], interval: 90, notes: "Bezpečnostní kontrola prvků", lastDone: null },
+      { id: "v9", name: "Kontrola a čištění okapů", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [], interval: 90, notes: "Domek, Nová chata, Altán, Maringotka, Jurta", lastDone: null },
+      { id: "v10", name: "Sazba trávy a doplňování osiva", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5], interval: 14, notes: "Úprava lysin v trávníku", lastDone: null },
+      { id: "v11", name: "Kontrola funkčnosti osvětlení v areálu", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 30, notes: "Výměna prasklých žárovek", lastDone: null },
+      { id: "v12", name: "Prořezávání stromů a keřů", category: "outdoor", areas: ["safran", "komunitni", "hrastice"], months: [3, 4, 10, 11], interval: 182, notes: "Sezónní řez", lastDone: null },
+      { id: "v13", name: "Kontrola topného systému a stavu paliva", category: "indoor", areas: ["safran", "komunitni", "skolni", "byty"], months: [9, 10, 11, 12, 1, 2], interval: 7, notes: "Dřevo, pelety, kontrola kotle", lastDone: null },
+      { id: "v14", name: "Zazimování venkovní vody a vypuštění trubek", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [10, 11], interval: 365, notes: "Ochrana před mrazem", lastDone: null },
+      { id: "v15", name: "Pravidelný generální úklid dílny", category: "indoor", areas: ["safran"], months: [], interval: 30, notes: "Třídění materiálu, úklid stolů", lastDone: null }
+    ];
+
+    // ---------- POMOCNÉ FUNKCE ----------
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function daysBetween(a, b) { return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000); }
+    function isSeasonActive(t, m) { return !t.months || t.months.length === 0 || t.months.includes(m); }
+    function isDue(t, today) { return !t.lastDone || daysBetween(t.lastDone, today) >= t.interval; }
+    
+    function storageGet(k) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+    function storageSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+
+    // ---------- HLAVNÍ APLIKACE ----------
+    function App() {
+      const [tab, setTab] = useState("dnes");
+      const [tasks, setTasks] = useState([]);
+      const [weather, setWeather] = useState({ date: todayStr(), isRaining: false });
+      const [extra, setExtra] = useState([]);
+      const [log, setLog] = useState([]);
+      const [sessions, setSessions] = useState([]);
+      const [selectedAreaFilter, setSelectedAreaFilter] = useState("all");
+      const [wageSettings, setWageSettings] = useState({ defaultRate: 300, areaRates: { safran: 300, komunitni: 300, skolni: 300, byty: 350, hrastice: 350, vrchlabi: 350 } });
+
+      useEffect(() => {
+        setTasks(storageGet("tasks-catalog") || SEED_TASKS);
+        setWeather(storageGet("weather-state") || { date: todayStr(), isRaining: false });
+        setExtra(storageGet("extra-tasks") || []);
+        setLog(storageGet("handover-log") || []);
+        setSessions(storageGet("work-sessions") || []);
+        const ws = storageGet("wage-settings");
+        if (ws) setWageSettings(ws);
+      }, []);
+
+      const today = todayStr();
+      const month = new Date().getMonth() + 1;
+
+      // Filtr úkolů podle objektu
+      const filteredTasks = useMemo(() => {
+        if (selectedAreaFilter === "all") return tasks;
+        return tasks.filter(t => t.areas && t.areas.includes(selectedAreaFilter));
+      }, [tasks, selectedAreaFilter]);
+
+      const due = useMemo(() => filteredTasks.filter(t => isSeasonActive(t, month) && isDue(t, today)), [filteredTasks, month, today]);
+      const dueIndoor = due.filter(t => t.category === "indoor");
+      const dueOutdoor = weather.isRaining ? [] : due.filter(t => t.category === "outdoor");
+      const outdoorBlocked = weather.isRaining ? due.filter(t => t.category === "outdoor") : [];
+
+      function toggleTask(id) {
+        const updated = tasks.map(t => t.id === id ? { ...t, lastDone: t.lastDone === today ? null : today } : t);
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function toggleRain() {
+        const next = { date: today, isRaining: !weather.isRaining };
+        setWeather(next);
+        storageSet("weather-state", next);
+      }
+
+      function addExtra(name) {
+        if (!name.trim()) return;
+        const updated = [...extra, { id: "e-" + Date.now(), name, done: false, date: today }];
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      function toggleExtra(id) {
+        const updated = extra.map(e => e.id === id ? { ...e, done: !e.done } : e);
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      function deleteExtra(id) {
+        const updated = extra.filter(e => e.id !== id);
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      function addTask(newTask) {
+        const updated = [...tasks, { ...newTask, id: "t-" + Date.now(), lastDone: null }];
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function deleteTask(id) {
+        const updated = tasks.filter(t => t.id !== id);
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function addLogEntry(text) {
+        if (!text.trim()) return;
+        const entry = { id: "l-" + Date.now(), date: today, time: new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }), text, author: "Údržbář" };
+        const updated = [entry, ...log];
+        setLog(updated);
+        storageSet("handover-log", updated);
+      }
+
+      function startShift(area) {
+        if (sessions.some(s => !s.end)) return;
+        const updated = [{ id: "s-" + Date.now(), date: today, start: new Date().toISOString(), end: null, area: area || "safran" }, ...sessions];
+        setSessions(updated);
+        storageSet("work-sessions", updated);
+      }
+
+      function endShift() {
+        const idx = sessions.findIndex(s => !s.end);
+        if (idx < 0) return;
+        const now = new Date().toISOString();
+        const s = sessions[idx];
+        const hours = Math.round(((new Date(now) - new Date(s.start)) / 3600000) * 100) / 100;
+        const rate = wageSettings.areaRates[s.area] || wageSettings.defaultRate;
+        const updated = sessions.map((x, i) => i === idx ? { ...x, end: now, hours, rate, wage: Math.round(hours * rate) } : x);
+        setSessions(updated);
+        storageSet("work-sessions", updated);
+      }
+
+      function deleteSession(id) {
+        const updated = sessions.filter(s => s.id !== id);
+        setSessions(updated);
+        storageSet("work-sessions", updated);
+      }
+
+      return e("div", { className: "max-w-3xl mx-auto p-4 sm:p-6" },
+        // Hlavička
+        e("div", { className: "flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-[#3A3F44] pb-4" },
+          e("div", null,
+            e("h1", { className: "text-2xl font-bold uppercase tracking-wide text-[#F2A93B]" }, "Provozní deník údržby"),
+            e("p", { className: "text-sm text-gray-400 capitalize" }, new Intl.DateTimeFormat("cs-CZ", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()))
+          ),
+          e("button", {
+            onClick: toggleRain,
+            className: `px-4 py-2 rounded-xl text-sm font-semibold border transition flex items-center gap-2 ${weather.isRaining ? "bg-red-900/30 border-red-500 text-red-400" : "bg-[#2E3338] border-[#3A3F44] text-gray-200"}`
+          },
+            weather.isRaining ? "🌧️ Dnes prší" : "☀️ Dnes je sucho"
+          )
+        ),
+
+        // Filtrování podle objektů
+        e("div", { className: "flex items-center gap-2 mb-6 overflow-x-auto pb-2" },
+          e("span", { className: "text-xs font-bold text-gray-400 uppercase mr-1" }, "Objekt:"),
+          e("button", {
+            onClick: () => setSelectedAreaFilter("all"),
+            className: `px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${selectedAreaFilter === "all" ? "bg-[#F2A93B] text-black" : "bg-[#24282C] text-gray-400 border border-[#3A3F44]"}`
+          }, "Všechny objekty"),
+          AREAS.map(a => e("button", {
+            key: a.id,
+            onClick: () => setSelectedAreaFilter(a.id),
+            className: `px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border transition`,
+            style: {
+              borderColor: a.color,
+              backgroundColor: selectedAreaFilter === a.id ? a.color : "#24282C",
+              color: selectedAreaFilter === a.id ? "#ffffff" : a.color
+            }
+          }, a.label))
+        ),
+
+        // Hlavní navigační menu
+        e("div", { className: "flex gap-2 mb-6 bg-[#24282C] p-1.5 rounded-2xl border border-[#3A3F44]" },
+          [
+            { id: "dnes", label: "Dnes" },
+            { id: "katalog", label: "Katalog úkolů" },
+            { id: "vykaz", label: "Výkaz práce" },
+            { id: "protokol", label: "Protokol & Deník" }
+          ].map(t => e("button", {
+            key: t.id,
+            onClick: () => setTab(t.id),
+            className: `flex-1 py-2.5 rounded-xl text-sm font-bold transition text-center ${tab === t.id ? "bg-[#F2A93B] text-black shadow-md" : "text-gray-400 hover:text-white"}`
+          }, t.label))
+        ),
+
+        // OBSAH ZÁLOŽEK
+        tab === "dnes" && e(DnesTab, { dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask: toggleTask, onAddExtra: addExtra, onToggleExtra: toggleExtra, onDeleteExtra: deleteExtra, today }),
+        tab === "katalog" && e(KatalogTab, { tasks: filteredTasks, onAddTask: addTask, onDeleteTask: deleteTask }),
+        tab === "protokol" && e(ProtokolTab, { log, onAddLog: addLogEntry }),
+        tab === "vykaz" && e(VykazTab, { sessions, onStart: startShift, onEnd: endShift, onDelete: deleteSession, wageSettings, setWageSettings })
+      );
+    }
+
+    // ---------- ZÁLOŽKA DNES ----------
+    function DnesTab({ dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra, today }) {
+      const [text, setText] = useState("");
+      return e("div", { className: "space-y-6" },
+        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/20 border border-red-500/40 text-red-400" },
+          e("p", { className: "font-bold text-sm mb-1" }, `⚠️ Odloženo kvůli dešti (${outdoorBlocked.length})`),
+          outdoorBlocked.map(t => e("p", { key: t.id, className: "text-xs opacity-90" }, `• ${t.name}`))
+        ),
+
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `Vnitřní úkoly (${dueIndoor.length})`),
+          dueIndoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Žádné plánované vnitřní úkoly.") :
+          dueIndoor.map(t => e(TaskCard, { key: t.id, task: t, onToggle: onToggleTask, today }))
+        ),
+
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `Venkovní úkoly (${dueOutdoor.length})`),
+          dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Žádné venkovní úkoly k provedení.") :
+          dueOutdoor.map(t => e(TaskCard, { key: t.id, task: t, onToggle: onToggleTask, today }))
+        ),
+
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, "Mimořádné úkoly dnes"),
+          extra.map(ex => e("div", { key: ex.id, className: "flex items-center justify-between p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("div", { className: "flex items-center gap-3 cursor-pointer", onClick: () => onToggleExtra(ex.id) },
+              e("span", { className: "text-lg" }, ex.done ? "✅" : "⚪"),
+              e("span", { className: `text-sm ${ex.done ? "line-through text-gray-500" : "text-gray-200"}` }, ex.name)
+            ),
+            e("button", { onClick: () => onDeleteExtra(ex.id), className: "text-gray-500 hover:text-red-400 text-xs px-2" }, "Smazat")
+          )),
+          e("div", { className: "flex gap-2 mt-3" },
+            e("input", {
+              value: text,
+              onChange: e => setText(e.target.value),
+              onKeyDown: e => { if (e.key === "Enter") { onAddExtra(text); setText(""); } },
+              placeholder: "Přidat rychlý úkol…",
+              className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none"
+            }),
+            e("button", { onClick: () => { onAddExtra(text); setText(""); }, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, "Přidat")
+          )
+        )
+      );
+    }
+
+    function TaskCard({ task, onToggle, today }) {
+      const isDone = task.lastDone === today;
+      return e("div", {
+        onClick: () => onToggle(task.id),
+        className: "flex items-start justify-between p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] cursor-pointer hover:border-gray-500 transition"
+      },
+        e("div", { className: "flex items-start gap-3" },
+          e("span", { className: "text-lg mt-0.5" }, isDone ? "✅" : "⚪"),
+          e("div", null,
+            e("p", { className: `text-sm font-medium ${isDone ? "line-through text-gray-500" : "text-gray-100"}` }, task.name),
+            task.notes && e("p", { className: "text-xs text-gray-400 mt-0.5" }, task.notes)
+          )
+        ),
+        e("div", { className: "flex gap-1" },
+          (task.areas || []).map(aId => {
+            const area = AREAS.find(a => a.id === aId);
+            return area ? e("span", { key: aId, className: "text-[10px] px-2 py-0.5 rounded-full font-bold", style: { backgroundColor: area.color + "22", color: area.color, border: `1px solid ${area.color}55` } }, area.label) : null;
+          })
+        )
+      );
+    }
+
+    // ---------- ZÁLOŽKA KATALOG ----------
+    function KatalogTab({ tasks, onAddTask, onDeleteTask }) {
+      const [name, setName] = useState("");
+      const [cat, setCat] = useState("indoor");
+      const [interval, setInterval] = useState(7);
+      const [notes, setNotes] = useState("");
+
+      return e("div", { className: "space-y-6" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3 uppercase tracking-wider" }, "Přidat nový úkol do katalogu"),
+          e("div", { className: "space-y-3" },
+            e("input", { value: name, onChange: e => setName(e.target.value), placeholder: "Název úkolu", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("div", { className: "flex gap-2 flex-wrap" },
+              e("select", { value: cat, onChange: e => setCat(e.target.value), className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
+                e("option", { value: "indoor" }, "Vnitřní úkol"),
+                e("option", { value: "outdoor" }, "Venkovní úkol")
+              ),
+              e("input", { type: "number", value: interval, onChange: e => setInterval(Number(e.target.value)), placeholder: "Interval (dní)", className: "w-32 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" })
+            ),
+            e("input", { value: notes, onChange: e => setNotes(e.target.value), placeholder: "Poznámka / Instrukce", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("button", {
+              onClick: () => {
+                if (name.trim()) {
+                  onAddTask({ name, category: cat, interval, notes, months: [], areas: ["safran"] });
+                  setName(""); setNotes("");
+                }
+              },
+              className: "w-full py-2.5 rounded-xl bg-[#F2A93B] text-black font-bold text-sm mt-2"
+            }, "Uložit úkol do databáze")
+          )
+        ),
+
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Katalog systémových úkolů (${tasks.length})`),
+          tasks.map(t => e("div", { key: t.id, className: "flex justify-between items-start p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("div", null,
+              e("p", { className: "text-sm font-semibold text-gray-100" }, t.name),
+              e("p", { className: "text-xs text-gray-400 mt-0.5" }, `Opakování: co ${t.interval} dní | ${t.category === "indoor" ? "Vnitřní" : "Venkovní"}`),
+              t.notes && e("p", { className: "text-xs text-gray-400 italic mt-1" }, t.notes)
+            ),
+            e("button", { onClick: () => onDeleteTask(t.id), className: "text-gray-500 hover:text-red-400 text-xs px-2 py-1" }, "Smazat")
+          ))
+        )
+      );
+    }
+
+    // ---------- ZÁLOŽKA PROTOKOL ----------
+    function ProtokolTab({ log, onAddLog }) {
+      const [text, setText] = useState("");
+      return e("div", { className: "space-y-6" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-2" }, "Nové hlášení / Záznam do deníku"),
+          e("textarea", {
+            value: text,
+            onChange: e => setText(e.target.value),
+            placeholder: "Zapsat poznámku ze směny, závady nebo vzkaz…",
+            className: "w-full p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none h-28 mb-3"
+          }),
+          e("button", {
+            onClick: () => { onAddLog(text); setText(""); },
+            className: "w-full py-2.5 rounded-xl bg-[#F2A93B] text-black font-bold text-sm"
+          }, "Zapsat hlášení")
+        ),
+
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Historie zápisů"),
+          log.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Zatím nebyly provedeny žádné záznamy.") :
+          log.map(l => e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("div", { className: "flex justify-between text-xs text-gray-400 mb-1" },
+              e("span", { className: "font-bold text-[#F2A93B]" }, l.author || "Údržbář"),
+              e("span", null, `${l.date} v ${l.time}`)
+            ),
+            e("p", { className: "text-sm text-gray-200 whitespace-pre-line" }, l.text)
+          ))
+        )
+      );
+    }
+
+    // ---------- ZÁLOŽKA VÝKAZ PRÁCE ----------
+    function VykazTab({ sessions, onStart, onEnd, onDelete, wageSettings }) {
+      const [selectedArea, setSelectedArea] = useState("safran");
+      const active = sessions.find(s => !s.end);
+      const totalWage = sessions.reduce((acc, s) => acc + (s.wage || 0), 0);
+      const totalHours = Math.round(sessions.reduce((acc, s) => acc + (s.hours || 0), 0) * 100) / 100;
+
+      return e("div", { className: "space-y-6" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
+          active ? e("div", { className: "space-y-3" },
+            e("p", { className: "text-sm text-green-400 font-bold" }, `⏱️ Měření času běží (od ${new Date(active.start).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })})`),
+            e("button", { onClick: onEnd, className: "w-full py-3 rounded-xl bg-red-500 text-white font-bold text-sm shadow-lg" }, "Ukončit směnu")
+          ) : e("div", { className: "space-y-3" },
+            e("p", { className: "text-xs font-bold text-gray-400 uppercase" }, "Vyberte objekt pro novou směnu:"),
+            e("select", { value: selectedArea, onChange: e => setSelectedArea(e.target.value), className: "w-full p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
+              AREAS.map(a => e("option", { key: a.id, value: a.id }, a.label))
+            ),
+            e("button", { onClick: () => onStart(selectedArea), className: "w-full py-3 rounded-xl bg-[#F2A93B] text-black font-bold text-sm shadow-lg" }, "Zahájit směnu")
+          )
+        ),
+
+        e("div", { className: "grid grid-cols-2 gap-4" },
+          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
+            e("p", { className: "text-xs text-gray-400 uppercase font-bold" }, "Odpracováno"),
+            e("p", { className: "text-2xl font-bold text-[#F2A93B] mt-1" }, `${totalHours} hod`)
+          ),
+          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
+            e("p", { className: "text-xs text-gray-400 uppercase font-bold" }, "Celková výplata"),
+            e("p", { className: "text-2xl font-bold text-green-400 mt-1" }, `${totalWage} Kč`)
+          )
+        ),
+
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Přehled odpracovaných směn"),
+          sessions.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Zatím nebyla zaznamenána žádná směna.") :
+          sessions.map(s => e("div", { key: s.id, className: "flex justify-between items-center p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("div", null,
+              e("p", { className: "text-sm font-bold text-gray-200" }, `${s.date} ${s.end ? "" : "(Probíhá…)"}`),
+              e("p", { className: "text-xs text-gray-400" }, `Místo: ${(AREAS.find(a=>a.id===s.area)||{}).label || s.area}`),
+              s.hours && e("p", { className: "text-xs text-green-400 font-semibold mt-0.5" }, `${s.hours} hod × ${s.rate} Kč/h = ${s.wage} Kč`)
+            ),
+            s.end && e("button", { onClick: () => onDelete(s.id), className: "text-gray-500 hover:text-red-400 text-xs px-2 py-1" }, "Smazat")
+          ))
+        )
+      );
+    }
+
+    // Inicializace Reactu
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
