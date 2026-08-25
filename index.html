@@ -1,0 +1,1806 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">import React, { useState, useEffect, useMemo } from "react";</p>
+<p class="p1">import {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>CloudRain, Sun, CheckCircle2, Circle, Plus, Trash2, Sunrise, Sunset,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Wrench, ClipboardList, CalendarDays, X, RotateCcw, BarChart3,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>ChevronLeft, ChevronRight, Clock, PlayCircle, StopCircle, Wallet, Settings2,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>CalendarClock</p>
+<p class="p1">} from "lucide-react";</p>
+<p class="p2"><br></p>
+<p class="p1">// ---------- barvy a styl ----------</p>
+<p class="p1">const C = {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>bg: "#1B1E21",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>panel: "#24282C",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>panelAlt: "#2E3338",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>border: "#3A3F44",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>amber: "#F2A93B",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>amberDark: "#C98420",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>green: "#5FB77E",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>red: "#E2694B",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>text: "#ECECEA",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>muted: "#9AA0A6",</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const FREQ = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 1, label: "Denně" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 3, label: "Průběžně (co pár dní)" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 7, label: "Týdně" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 14, label: "Co 2 týdny" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 30, label: "Měsíčně" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 90, label: "Čtvrtletně" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 182, label: "Pololetně" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ value: 365, label: "Ročně" },</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">const MONTHS = ["Led", "Úno", "Bře", "Dub", "Kvě", "Čvn", "Čvc", "Srp", "Zář", "Říj", "Lis", "Pro"];</p>
+<p class="p1">const MONTHS_FULL = ["leden","únor","březen","duben","květen","červen","červenec","srpen","září","říjen","listopad","prosinec"];</p>
+<p class="p2"><br></p>
+<p class="p1">const AREAS = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "safran", label: "Šafrán", color: "#8B5FBF" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "komunitni", label: "Komunitní prostor", color: "#3B5BA5" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "skolni", label: "Školní prostor", color: "#2E8B7D" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "byty", label: "Byty", color: "#6B6B6B" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "hrastice", label: "Chata Hraštice", color: "#C24B4B" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "vrchlabi", label: "Vrchlabí 172", color: "#9A8B3F" },</p>
+<p class="p1">];</p>
+<p class="p1">const EXTRA_AREA = { id: "mimoradne", label: "Mimořádné", color: "#E2694B" };</p>
+<p class="p1">function areaInfo(id) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return AREAS.find((a) =&gt; a.id === id) || (id === "mimoradne" ? EXTRA_AREA : { id, label: id, color: "#9AA0A6" });</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// ---------- role (V JAKÉ ROLI) ----------</p>
+<p class="p1">const ROLES = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "spravce", label: "Správce", color: "#6FA8DC", desc: "Denní kontrolní kolečka, dohled nad objekty" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "udrzbar", label: "Údržbář / zahradník", color: "#5FB77E", desc: "Sezónní a pravidelná údržba dle katalogu" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "mistr", label: "Mistr", color: "#F2A93B", desc: "Dílny a program s dětmi" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "tvurce", label: "Tvůrce / řemeslník", color: "#B388EB", desc: "Projektové řemeslné a tvůrčí práce" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "manzel", label: "Hodinový manžel", color: "#E07A5F", desc: "Objednávkové zakázky na hodiny" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "pohotovost", label: "Pohotovost", color: "#C24B4B", desc: "Rezervovaná kapacita jen dle potřeby" },</p>
+<p class="p1">];</p>
+<p class="p1">function roleInfo(id) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return ROLES.find((r) =&gt; r.id === id) || ROLES[1];</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// dny v týdnu: 1=Po ... 7=Ne</p>
+<p class="p1">const DOW = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];</p>
+<p class="p1">function isoDow(dateStr) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date(dateStr + "T00:00:00").getDay(); // 0=Ne</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return d === 0 ? 7 : d;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// ---------- Rozvrh: pravidla, ze kterých appka sama poskládá den/týden/měsíc/rok ----------</p>
+<p class="p1">const SEED_SCHEDULE = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r1", label: "Ranní kontrolní kolečko", role: "spravce",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [1,2,3,4,5,6,7], months: [], timeStart: "06:00", timeEnd: "06:30",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: ["safran", "komunitni", "skolni"], subject: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Odemčení/uzamčení, rychlá kontrola objektů, co se stalo přes noc.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r2", label: "Sezónní údržba zahrady a exteriéru", role: "udrzbar",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [2,4,6], months: [3,4,5,9,10,11], timeStart: "08:00", timeEnd: "12:00",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: ["safran", "komunitni", "skolni"], subject: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Jaro/podzim: dle katalogu (sekání, hrabání, úklid, kontrola). Konkrétní úkoly se doplní z Katalogu.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r3", label: "Letní údržba a zálivka", role: "udrzbar",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [1,3,5], months: [6,7,8], timeStart: "07:00", timeEnd: "10:00",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: ["safran", "komunitni", "skolni"], subject: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Zálivka záhonů, sekání trávy 1x/týden, drobné opravy.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r4", label: "Zimní provoz a topení", role: "udrzbar",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [1,2,3,4,5,6,7], months: [12,1,2], timeStart: "06:30", timeEnd: "08:00",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: ["safran", "komunitni", "skolni"], subject: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Zátop, kontrola topení, dle potřeby sníh a posyp.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r5", label: "Dílna s dětmi", role: "mistr",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [3], months: [], timeStart: "15:00", timeEnd: "18:00",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: ["skolni"], subject: "ŠMP / školní klub",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Řemeslná dílna, tvoření a drobné opravy společně s dětmi.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r6", label: "Sobotní brigáda", role: "udrzbar",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [6], months: [3,4,5,9,10,11], timeStart: "08:00", timeEnd: "12:00",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: ["komunitni"], subject: "Komunitní zahrada",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Společná brigáda — sezónní úklid, sázení, údržba záhonů.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r7", label: "Řemeslné projekty", role: "tvurce",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [5], months: [], timeStart: "09:00", timeEnd: "13:00",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: [], subject: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Volný projektový čas — větší opravy, výroba, vylepšení dle backlogu.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r8", label: "Hodinový manžel", role: "manzel",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [], months: [], timeStart: "", timeEnd: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: [], subject: "dle objednávky",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Práce na objednávku mimo pravidelný rozvrh — domluva individuálně.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: "r9", label: "Pohotovost", role: "pohotovost",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>days: [], months: [], timeStart: "", timeEnd: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>areas: [], subject: "",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note: "Rezervovaná kapacita pro havárie a naléhavé věci — nasazuje se jen podle potřeby.",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">const SEED_TASKS = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v1", name: "Větrání teepee / jurty", role: "udrzbar", category: "indoor", areas: ["komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 1, notes: "Konkrétně: KOM prostor; Školní prostor, Jurta", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v2", name: "Zalévání záhonů, květin, stromků, keřů", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 3, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v3", name: "Sekání trávy", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5, 9, 10, 11], interval: 14, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v4", name: "Odzimování, úklid po zimě (hrabání, hnojení)", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v5", name: "Kontrola stavu po zimě + soupis potřebných oprav", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Výstup jde do backlogu oprav", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v6", name: "Otevření a kontrola venkovní vody, napojení hadic", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v7", name: "Kontrola nářadí a vybavení", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v8", name: "Kontrola hřiště a herních prvků po zimě", role: "udrzbar", category: "outdoor", areas: ["safran", "skolni"], months: [3, 4, 5], interval: 90, notes: "Konkrétně: Šafrán exteriér; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v9", name: "Kontrola a čištění okapů", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [], interval: 90, notes: "Konkrétně: Domek, Nová chata, Altán (Šafrán), Odpolední ŠMP, Dílna; Knihobudka/kontejner; Maringotka, Altán (Školní prostor), Kancelář, Kuchyňka, Mobilheim, Jurta", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v10", name: "Sazba trávy", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 14, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v11", name: "Sazba květin, bylinek, rostlin", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 14, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v12", name: "Nátěr plotu", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 14, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v13", name: "Drobné opravy k provozu, zajištění nářadí a materiálu", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [6, 7, 8], interval: 3, notes: "", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v14", name: "Sekání trávy", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [6, 7, 8], interval: 7, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v15", name: "Péče o stromy (ořez, česání plodů)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [6, 7, 8], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v16", name: "Větrání a topení teepee / jurty", role: "udrzbar", category: "indoor", areas: ["komunitni", "skolni"], months: [1, 2, 9, 10, 11, 12], interval: 1, notes: "Konkrétně: KOM prostor; Školní prostor, Jurta", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v17", name: "Hrabání listí, úklid před zimou", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [9, 10, 11], interval: 3, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v18", name: "Zazimování zahrady a záhonů", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v19", name: "Uzavření venkovní vody + odpojení hadic", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v20", name: "Péče o stromy (ořez)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v21", name: "Štípání dřeva na zátop + naskladnění", role: "udrzbar", category: "indoor", areas: ["safran", "skolni"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér, Altán (Šafrán), V3S; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v22", name: "Kontrola krbových kamen před topnou sezónou", role: "udrzbar", category: "indoor", areas: ["safran", "skolni"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér, Altán (Šafrán), V3S", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v23", name: "Kontrola stavu střech", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér, Domek, Nová chata, Altán (Šafrán), Odpolední ŠMP, Dílna", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v24", name: "Impregnace plachet (teepee, jurta)", role: "udrzbar", category: "indoor", areas: ["komunitni", "skolni"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: KOM prostor; Školní prostor, Jurta", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v25", name: "Kontrola nářadí před zimou (sekery, špalek)", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [9, 10, 11], interval: 90, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v26", name: "Zátop / zapnutí topení před provozem", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [1, 2, 12], interval: 1, notes: "Konkrétně: Šafrán exteriér, Altán (Šafrán), Odpolední ŠMP, V3S", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v27", name: "Štípání dřeva, doplňování zásoby u kamen", role: "udrzbar", category: "indoor", areas: ["safran", "skolni"], months: [1, 2, 12], interval: 3, notes: "Konkrétně: Šafrán exteriér", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v28", name: "Kontrola nářadí a vybavení", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [1, 2, 12], interval: 3, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v29", name: "Odklízení sněhu – přístupy, cesty, plochy", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [1, 2, 12], interval: 14, notes: "Konkrétně: Šafrán exteriér, Domek; KOM prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v30", name: "Ometání sněhu ze střech", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [1, 2, 12], interval: 14, notes: "Konkrétně: Šafrán exteriér, Nová chata, Altán (Šafrán), Odpolední ŠMP, Dílna, V3S", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v31", name: "Péče o jezírko - čištění vody, filtru, kontrola čerpadla", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni"], months: [], interval: 1, notes: "Konkrétně: Šafrán exteriér; KOM prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v32", name: "Krmení ryb", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni"], months: [], interval: 1, notes: "Konkrétně: Šafrán exteriér; KOM prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v33", name: "Knihobudka - srovnání knih, čištění regálků", role: "udrzbar", category: "indoor", areas: ["komunitni"], months: [], interval: 1, notes: "Konkrétně: Knihobudka/kontejner", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v34", name: "Úklid venkovních prostor kolem domku (hrabání listí, umytí lavic, zametení, příprava hřiště)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 1, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v35", name: "Přeházení kompostu, vybrání odpadu", role: "udrzbar", category: "outdoor", areas: ["komunitni"], months: [], interval: 1, notes: "Konkrétně: KOM prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v36", name: "Vývoz / výměna náplně Bio WC", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 3, notes: "Konkrétně: Altán (Šafrán), V3S; Knihobudka/kontejner; Maringotka, Kancelář", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v37", name: "Pořádek, údržba a kontrola zázemí", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 3, notes: "", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v38", name: "Péče o nářadí, kontrola uskladnění", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 3, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v39", name: "Impregnace a čištění plachet (teepee, jurta)", role: "udrzbar", category: "indoor", areas: ["komunitni", "skolni"], months: [], interval: 3, notes: "Konkrétně: KOM prostor; Jurta", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v40", name: "Informování o docházejícím materiálu", role: "spravce", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 3, notes: "Konkrétně: Šafrán exteriér; KOM prostor; Školní prostor", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v41", name: "Nahlášení zjištěných nedostatků → backlog oprav", role: "spravce", category: "indoor", areas: ["safran", "komunitni", "skolni", "byty", "hrastice", "vrchlabi"], months: [], interval: 3, notes: "", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v42", name: "Měsíční report odvedené práce", role: "spravce", category: "indoor", areas: ["safran", "komunitni", "skolni", "byty", "hrastice", "vrchlabi"], months: [], interval: 7, notes: "", lastDone: null },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{ id: "v43", name: "Generální úklid", role: "udrzbar", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 30, notes: "", lastDone: null },</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">function todayStr() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return d.toISOString().slice(0, 10);</p>
+<p class="p1">}</p>
+<p class="p1">function daysBetween(a, b) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const A = new Date(a + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const B = new Date(b + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return Math.round((B - A) / 86400000);</p>
+<p class="p1">}</p>
+<p class="p1">function addDaysStr(dateStr, n) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date(dateStr + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>d.setDate(d.getDate() + n);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return d.toISOString().slice(0, 10);</p>
+<p class="p1">}</p>
+<p class="p1">function isSeasonActive(task, month) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return !task.months || task.months.length === 0 || task.months.includes(month);</p>
+<p class="p1">}</p>
+<p class="p1">function isDue(task, today) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!task.lastDone) return true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return daysBetween(task.lastDone, today) &gt;= task.interval;</p>
+<p class="p1">}</p>
+<p class="p1">function daysUntilDue(task, today) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!task.lastDone) return 0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return task.interval - daysBetween(task.lastDone, today);</p>
+<p class="p1">}</p>
+<p class="p1">function nextDueDate(task, today) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return task.lastDone ? addDaysStr(task.lastDone, task.interval) : today;</p>
+<p class="p1">}</p>
+<p class="p1">function pad2(n) { return String(n).padStart(2, "0"); }</p>
+<p class="p1">function daysInMonth(year, month) { return new Date(year, month, 0).getDate(); }</p>
+<p class="p1">function monthRange(year, month) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return [`${year}-${pad2(month)}-01`, `${year}-${pad2(month)}-${pad2(daysInMonth(year, month))}`];</p>
+<p class="p1">}</p>
+<p class="p1">function startOfWeek(dateStr) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date(dateStr + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dow = (d.getDay() + 6) % 7; // 0 = Monday</p>
+<p class="p1"><span class="Apple-converted-space">  </span>d.setDate(d.getDate() - dow);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return d.toISOString().slice(0, 10);</p>
+<p class="p1">}</p>
+<p class="p1">function endOfWeek(dateStr) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return addDaysStr(startOfWeek(dateStr), 6);</p>
+<p class="p1">}</p>
+<p class="p1">function monthsInRange(startDate, endDate) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const months = new Set();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let cur = new Date(startDate + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const end = new Date(endDate + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>while (cur &lt;= end) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>months.add(cur.getMonth() + 1);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>cur.setDate(cur.getDate() + 1);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return [...months];</p>
+<p class="p1">}</p>
+<p class="p1">function seasonActiveForRange(task, startDate, endDate) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!task.months || task.months.length === 0) return true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const ms = monthsInRange(startDate, endDate);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return ms.some((m) =&gt; task.months.includes(m));</p>
+<p class="p1">}</p>
+<p class="p1">function pendingInRange(tasks, startDate, endDate, today) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return tasks.filter((t) =&gt; seasonActiveForRange(t, startDate, endDate) &amp;&amp; nextDueDate(t, today) &lt;= endDate);</p>
+<p class="p1">}</p>
+<p class="p1">function completedInRange(history, startDate, endDate) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return history.filter((h) =&gt; h.date &gt;= startDate &amp;&amp; h.date &lt;= endDate);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">async function storageGet(key) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const r = await window.storage.get(key, true);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return r ? JSON.parse(r.value) : null;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return null;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">}</p>
+<p class="p1">async function storageSet(key, value) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await window.storage.set(key, JSON.stringify(value), true);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>console.error("Ukládání se nezdařilo", key, e);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function Badge({ children, color }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;span</p>
+<p class="p1"><span class="Apple-converted-space">      </span>className="text-xs font-semibold px-2 py-0.5 rounded-full"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>style={{ background: color + "22", color, border: `1px solid ${color}55` }}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{children}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function TabButton({ active, onClick, icon: Icon, children }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">      </span>onClick={onClick}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background: active ? C.amber : "transparent",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>color: active ? "#1B1E21" : C.muted,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;Icon size={16} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{children}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">export default function MaintenanceApp() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [loading, setLoading] = useState(true);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [tasks, setTasks] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [weather, setWeather] = useState({ date: todayStr(), isRaining: false });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [extraTasks, setExtraTasks] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [log, setLog] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [history, setHistory] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [sessions, setSessions] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [wageSettings, setWageSettings] = useState({ defaultRate: 300, areaRates: {} });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [scheduleRules, setScheduleRules] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [tab, setTab] = useState("dnes");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let catalog = await storageGet("tasks-catalog");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!catalog) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>catalog = SEED_TASKS;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("tasks-catalog", catalog);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTasks(catalog);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let ws = await storageGet("weather-state");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!ws || ws.date !== todayStr()) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>ws = { date: todayStr(), isRaining: false };</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("weather-state", ws);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setWeather(ws);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let extra = await storageGet("extra-tasks");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!extra) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>extra = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("extra-tasks", extra);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setExtraTasks(extra);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let l = await storageGet("handover-log");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!l) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>l = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("handover-log", l);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setLog(l);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let h = await storageGet("completion-history");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!h) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>h = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("completion-history", h);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setHistory(h);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let s = await storageGet("work-sessions");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!s) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>s = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("work-sessions", s);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setSessions(s);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let w = await storageGet("wage-settings");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!w) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>w = { defaultRate: 300, areaRates: {} };</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("wage-settings", w);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setWageSettings(w);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let sr = await storageGet("schedule-rules");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!sr) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>sr = SEED_SCHEDULE;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await storageSet("schedule-rules", sr);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setScheduleRules(sr);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>setLoading(false);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>})();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, []);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const today = todayStr();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = new Date().getMonth() + 1;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dueTasks = useMemo(</p>
+<p class="p1"><span class="Apple-converted-space">    </span>() =&gt; tasks.filter((t) =&gt; isSeasonActive(t, month) &amp;&amp; isDue(t, today)),</p>
+<p class="p1"><span class="Apple-converted-space">    </span>[tasks, month, today]</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dueIndoor = dueTasks.filter((t) =&gt; t.category === "indoor");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dueOutdoorAll = dueTasks.filter((t) =&gt; t.category === "outdoor");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const outdoorBlocked = weather.isRaining ? dueOutdoorAll : [];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const outdoorAvailable = weather.isRaining ? [] : dueOutdoorAll;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const fillerSuggestions = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return tasks</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.filter((t) =&gt; t.category === "indoor" &amp;&amp; isSeasonActive(t, month) &amp;&amp; !isDue(t, today))</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.sort((a, b) =&gt; daysUntilDue(a, today) - daysUntilDue(b, today))</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.slice(0, 3);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [tasks, month, today]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const openExtra = extraTasks.filter((e) =&gt; !e.done);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const totalToday = dueIndoor.length + outdoorAvailable.length + openExtra.length;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function toggleRain() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const next = { date: today, isRaining: !weather.isRaining };</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setWeather(next);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("weather-state", next);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function toggleTaskDone(id) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const target = tasks.find((t) =&gt; t.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const wasDoneToday = target.lastDone === today;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = tasks.map((t) =&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>t.id === id ? { ...t, lastDone: wasDoneToday ? null : today } : t</p>
+<p class="p1"><span class="Apple-converted-space">    </span>);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("tasks-catalog", updated);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let newHistory;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!wasDoneToday) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>newHistory = [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ id: "h-" + Date.now(), taskId: id, name: target.name, areas: target.areas, category: target.category, date: today },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>...history,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>].slice(0, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const idx = history.findIndex((h) =&gt; h.taskId === id &amp;&amp; h.date === today);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>newHistory = idx &gt;= 0 ? history.filter((_, i) =&gt; i !== idx) : history;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setHistory(newHistory);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("completion-history", newHistory);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function addTask(newTask) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = [...tasks, { ...newTask, id: "t-" + Date.now(), lastDone: null }];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("tasks-catalog", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function deleteTask(id) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = tasks.filter((t) =&gt; t.id !== id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("tasks-catalog", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function addExtra(name) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!name.trim()) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = [...extraTasks, { id: "e-" + Date.now(), name, done: false, addedDate: today }];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setExtraTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("extra-tasks", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function toggleExtra(id) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const target = extraTasks.find((e) =&gt; e.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = extraTasks.map((e) =&gt; (e.id === id ? { ...e, done: !e.done } : e));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setExtraTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("extra-tasks", updated);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let newHistory;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!target.done) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>newHistory = [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ id: "h-" + Date.now(), taskId: id, name: target.name, areas: ["mimoradne"], category: "extra", date: today },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>...history,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>].slice(0, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const idx = history.findIndex((h) =&gt; h.taskId === id &amp;&amp; h.date === today);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>newHistory = idx &gt;= 0 ? history.filter((_, i) =&gt; i !== idx) : history;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setHistory(newHistory);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("completion-history", newHistory);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function deleteExtra(id) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = extraTasks.filter((e) =&gt; e.id !== id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setExtraTasks(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("extra-tasks", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function addLogEntry(entry) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = [</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{ ...entry, id: "l-" + Date.now(), date: today, time: new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }) },</p>
+<p class="p1"><span class="Apple-converted-space">      </span>...log,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>].slice(0, 80);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setLog(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("handover-log", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function startShift(area) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (sessions.some((s) =&gt; !s.end)) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const nowIso = new Date().toISOString();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const newSession = { id: "s-" + Date.now(), date: todayStr(), start: nowIso, end: null, area: area || "obecne" };</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = [newSession, ...sessions];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setSessions(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("work-sessions", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function endShift() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const idx = sessions.findIndex((s) =&gt; !s.end);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (idx &lt; 0) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const nowIso = new Date().toISOString();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const s = sessions[idx];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const hours = (new Date(nowIso) - new Date(s.start)) / 3600000;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const rate = wageSettings.areaRates[s.area] || wageSettings.defaultRate;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = sessions.map((x, i) =&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>i === idx ? { ...x, end: nowIso, hours: Math.round(hours * 100) / 100, rate, wage: Math.round(hours * rate) } : x</p>
+<p class="p1"><span class="Apple-converted-space">    </span>);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setSessions(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("work-sessions", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function deleteSession(id) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = sessions.filter((s) =&gt; s.id !== id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setSessions(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("work-sessions", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function updateWageSettings(next) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setWageSettings(next);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("wage-settings", next);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function addRule(rule) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = [...scheduleRules, { ...rule, id: "r-" + Date.now() }];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setScheduleRules(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("schedule-rules", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function deleteRule(id) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updated = scheduleRules.filter((r) =&gt; r.id !== id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setScheduleRules(updated);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await storageSet("schedule-rules", updated);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dateLabel = new Intl.DateTimeFormat("cs-CZ", { weekday: "long", day: "numeric", month: "long" }).format(new Date());</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (loading) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style={{ background: C.bg, color: C.text, minHeight: "500px" }} className="flex items-center justify-center p-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p style={{ color: C.muted }}&gt;Načítám provozní deník…&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style={{ background: C.bg, color: C.text, minHeight: "600px", fontFamily: "'Inter', system-ui, sans-serif" }} className="p-4 sm:p-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;style&gt;{`</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.stencil { font-family: 'Oswald', 'Arial Narrow', sans-serif; letter-spacing: 0.03em; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`}&lt;/style&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Hlavička */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between flex-wrap gap-3 mb-5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;h1 className="stencil text-xl sm:text-2xl font-bold uppercase" style={{ color: C.amber }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Provozní deník údržby</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm capitalize" style={{ color: C.muted }}&gt;{dateLabel}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onClick={toggleRain}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm"</p>
+<p class="p1"><span class="Apple-converted-space">          </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: weather.isRaining ? C.red + "22" : C.panelAlt,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: `1px solid ${weather.isRaining ? C.red : C.border}`,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: weather.isRaining ? C.red : C.text,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{weather.isRaining ? &lt;CloudRain size={18} /&gt; : &lt;Sun size={18} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{weather.isRaining ? "Dnes prší" : "Dnes je sucho"}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Taby */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex gap-2 mb-5 flex-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;TabButton active={tab === "dnes"} onClick={() =&gt; setTab("dnes")} icon={CalendarDays}&gt;Dnes&lt;/TabButton&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;TabButton active={tab === "rozvrh"} onClick={() =&gt; setTab("rozvrh")} icon={CalendarClock}&gt;Rozvrh&lt;/TabButton&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;TabButton active={tab === "katalog"} onClick={() =&gt; setTab("katalog")} icon={Wrench}&gt;Katalog&lt;/TabButton&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;TabButton active={tab === "prehledy"} onClick={() =&gt; setTab("prehledy")} icon={BarChart3}&gt;Přehledy&lt;/TabButton&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;TabButton active={tab === "vykaz"} onClick={() =&gt; setTab("vykaz")} icon={Clock}&gt;Výkaz práce&lt;/TabButton&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;TabButton active={tab === "protokol"} onClick={() =&gt; setTab("protokol")} icon={ClipboardList}&gt;Protokol&lt;/TabButton&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tab === "dnes" &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;DnesTab</p>
+<p class="p1"><span class="Apple-converted-space">          </span>dueIndoor={dueIndoor}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>outdoorAvailable={outdoorAvailable}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>outdoorBlocked={outdoorBlocked}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>fillerSuggestions={fillerSuggestions}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>extraTasks={extraTasks}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>totalToday={totalToday}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onToggleTask={toggleTaskDone}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onAddExtra={addExtra}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onToggleExtra={toggleExtra}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onDeleteExtra={deleteExtra}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tab === "rozvrh" &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;RozvrhTab tasks={tasks} scheduleRules={scheduleRules} today={today} onAddRule={addRule} onDeleteRule={deleteRule} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tab === "katalog" &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;KatalogTab tasks={tasks} onAdd={addTask} onDelete={deleteTask} today={today} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tab === "protokol" &amp;&amp; &lt;ProtokolTab log={log} onAdd={addLogEntry} /&gt;}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tab === "prehledy" &amp;&amp; &lt;PrehledyTab tasks={tasks} history={history} today={today} /&gt;}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tab === "vykaz" &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;VykazTab</p>
+<p class="p1"><span class="Apple-converted-space">          </span>sessions={sessions}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>wageSettings={wageSettings}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>today={today}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onStart={startShift}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onEnd={endShift}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onDelete={deleteSession}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onUpdateRates={updateWageSettings}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function TaskRow({ task, onToggle, muted }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const done = task.lastDone === todayStr();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div</p>
+<p class="p1"><span class="Apple-converted-space">      </span>className="flex items-start gap-3 p-3 rounded-xl mb-2"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>style={{ background: C.panel, border: `1px solid ${C.border}`, opacity: muted ? 0.55 : 1 }}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onClick={() =&gt; onToggle(task.id)} className="mt-0.5 shrink-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{done ? &lt;CheckCircle2 size={22} color={C.green} /&gt; : &lt;Circle size={22} color={C.muted} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex-1 min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="font-medium text-sm" style={{ textDecoration: done ? "line-through" : "none", color: done ? C.muted : C.text }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{task.name}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{task.notes &amp;&amp; &lt;p className="text-xs mt-0.5" style={{ color: C.muted }}&gt;{task.notes}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex flex-col items-end gap-1 shrink-0 max-w-[40%]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Badge color={task.category === "indoor" ? "#6FA8DC" : C.amber}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{task.category === "indoor" ? "Vnitřní" : "Venkovní"}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="flex flex-wrap justify-end gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{(task.areas || []).map((a) =&gt; &lt;Badge key={a} color={areaInfo(a).color}&gt;{areaInfo(a).label}&lt;/Badge&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function DnesTab({ dueIndoor, outdoorAvailable, outdoorBlocked, fillerSuggestions, extraTasks, totalToday, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [newExtra, setNewExtra] = useState("");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm mb-4" style={{ color: C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{totalToday &gt; 0 ? `Dnes vás čeká ${totalToday} úkolů.` : "Podle plánu dnes nic nevisí — mrkněte na náhradní tipy níže."}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{outdoorBlocked.length &gt; 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="p-3 rounded-xl mb-4" style={{ background: C.red + "15", border: `1px solid ${C.red}55` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.red }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Odloženo kvůli dešti ({outdoorBlocked.length})</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{outdoorBlocked.map((t) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p key={t.id} className="text-sm mb-1" style={{ color: C.muted }}&gt;• {t.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{dueIndoor.length &gt; 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.text }}&gt;Vnitřní úkoly&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{dueIndoor.map((t) =&gt; &lt;TaskRow key={t.id} task={t} onToggle={onToggleTask} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{outdoorAvailable.length &gt; 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.text }}&gt;Venkovní úkoly&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{outdoorAvailable.map((t) =&gt; &lt;TaskRow key={t.id} task={t} onToggle={onToggleTask} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{(dueIndoor.length + outdoorAvailable.length === 0) &amp;&amp; fillerSuggestions.length &gt; 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.text }}&gt;Můžete udělat dopředu&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{fillerSuggestions.map((t) =&gt; &lt;TaskRow key={t.id} task={t} onToggle={onToggleTask} muted /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.text }}&gt;Mimořádné úkoly dnes&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{extraTasks.map((e) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div key={e.id} className="flex items-center gap-3 p-3 rounded-xl mb-2" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onClick={() =&gt; onToggleExtra(e.id)} className="shrink-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{e.done ? &lt;CheckCircle2 size={20} color={C.green} /&gt; : &lt;Circle size={20} color={C.muted} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p className="flex-1 text-sm" style={{ textDecoration: e.done ? "line-through" : "none", color: e.done ? C.muted : C.text }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{e.name}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onClick={() =&gt; onDeleteExtra(e.id)}&gt;&lt;Trash2 size={16} color={C.muted} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="flex gap-2 mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={newExtra}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setNewExtra(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onKeyDown={(e) =&gt; { if (e.key === "Enter") { onAddExtra(newExtra); setNewExtra(""); } }}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="Přidat mimořádný úkol…"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onClick={() =&gt; { onAddExtra(newExtra); setNewExtra(""); }}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="px-3 py-2 rounded-xl"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.amber, color: "#1B1E21" }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Plus size={18} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function KatalogTab({ tasks, onAdd, onDelete, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [open, setOpen] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [form, setForm] = useState({ name: "", category: "indoor", role: "udrzbar", areas: [], months: [], interval: 30, notes: "" });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function toggleMonth(m) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setForm((f) =&gt; ({ ...f, months: f.months.includes(m) ? f.months.filter((x) =&gt; x !== m) : [...f.months, m] }));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function submit() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!form.name.trim()) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>onAdd(form);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setForm({ name: "", category: "indoor", role: "udrzbar", areas: [], months: [], interval: 30, notes: "" });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setOpen(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex justify-between items-center mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm" style={{ color: C.muted }}&gt;{tasks.length} úkolů v katalogu&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">          </span>onClick={() =&gt; setOpen((o) =&gt; !o)}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-semibold"</p>
+<p class="p1"><span class="Apple-converted-space">          </span>style={{ background: C.amber, color: "#1B1E21" }}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{open ? &lt;X size={16} /&gt; : &lt;Plus size={16} /&gt;} {open ? "Zavřít" : "Přidat úkol"}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{open &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="p-4 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="Název úkolu"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={form.name}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setForm({ ...form, name: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex gap-2 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{["indoor", "outdoor"].map((c) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                </span>key={c}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onClick={() =&gt; setForm({ ...form, category: c })}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="flex-1 py-2 rounded-lg text-sm font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>background: form.category === c ? C.amber : C.panelAlt,</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>color: form.category === c ? "#1B1E21" : C.text,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{c === "indoor" ? "Vnitřní" : "Venkovní"}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;V jaké roli&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;select</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={form.role}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setForm({ ...form, role: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ROLES.map((r) =&gt; &lt;option key={r.id} value={r.id}&gt;{r.label}&lt;/option&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Kde (může platit na víc místech)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex flex-wrap gap-1 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{AREAS.map((a) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>const checked = form.areas.includes(a.id);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>key={a.id}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>onClick={() =&gt; setForm({ ...form, areas: checked ? form.areas.filter((x) =&gt; x !== a.id) : [...form.areas, a.id] })}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>className="px-2 py-1 rounded-md text-xs font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>style={{ background: checked ? a.color : C.panelAlt, color: checked ? "#fff" : C.muted }}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{a.label}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Sezóna (nic nezaškrtnuto = celoročně)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex flex-wrap gap-1 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{MONTHS.map((m, i) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                </span>key={m}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onClick={() =&gt; toggleMonth(i + 1)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="px-2 py-1 rounded-md text-xs font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>background: form.months.includes(i + 1) ? C.amber : C.panelAlt,</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>color: form.months.includes(i + 1) ? "#1B1E21" : C.muted,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{m}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Jak často&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;select</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={form.interval}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setForm({ ...form, interval: Number(e.target.value) })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{FREQ.map((f) =&gt; &lt;option key={f.value} value={f.value}&gt;{f.label}&lt;/option&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="Poznámka (nepovinné)"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={form.notes}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setForm({ ...form, notes: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button onClick={submit} className="w-full py-2 rounded-lg font-semibold text-sm" style={{ background: C.green, color: "#1B1E21" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Uložit úkol</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{tasks.map((t) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const due = isDue(t, today);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const nextDue = t.lastDone ? addDaysStr(t.lastDone, t.interval) : "ihned";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div key={t.id} className="flex items-start gap-3 p-3 rounded-xl mb-2" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex-1 min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="flex items-center gap-2 flex-wrap mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p className="font-medium text-sm"&gt;{t.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Badge color={t.category === "indoor" ? "#6FA8DC" : C.amber}&gt;{t.category === "indoor" ? "Vnitřní" : "Venkovní"}&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Badge color={roleInfo(t.role).color}&gt;{roleInfo(t.role).label}&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{due &amp;&amp; &lt;Badge color={C.green}&gt;Aktuálně due&lt;/Badge&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{(t.areas || []).map((a) =&gt; &lt;Badge key={a} color={areaInfo(a).color}&gt;{areaInfo(a).label}&lt;/Badge&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;p className="text-xs" style={{ color: C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{FREQ.find((f) =&gt; f.value === t.interval)?.label} · {t.months.length ? t.months.map((m) =&gt; MONTHS[m - 1]).join(", ") : "celoročně"} · další termín: {nextDue}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{t.notes &amp;&amp; &lt;p className="text-xs mt-1" style={{ color: C.muted }}&gt;{t.notes}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onClick={() =&gt; onDelete(t.id)}&gt;&lt;Trash2 size={16} color={C.muted} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function ProtokolTab({ log, onAdd }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [form, setForm] = useState({ type: null, author: "", text: "" });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function submit() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!form.text.trim()) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>onAdd({ type: form.type, author: form.author || "Údržbář", text: form.text });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setForm({ type: null, author: form.author, text: "" });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{!form.type ? (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="flex gap-3 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onClick={() =&gt; setForm((f) =&gt; ({ ...f, type: "ranni" }))}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="flex-1 flex flex-col items-center gap-1 py-4 rounded-xl font-semibold text-sm"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panel, border: `1px solid ${C.border}` }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Sunrise color={C.amber} /&gt; Ranní předání</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onClick={() =&gt; setForm((f) =&gt; ({ ...f, type: "vecerni" }))}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="flex-1 flex flex-col items-center gap-1 py-4 rounded-xl font-semibold text-sm"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panel, border: `1px solid ${C.border}` }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Sunset color="#6FA8DC" /&gt; Večerní předání</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="p-4 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-3 flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{form.type === "ranni" ? &lt;Sunrise size={16} color={C.amber} /&gt; : &lt;Sunset size={16} color="#6FA8DC" /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{form.type === "ranni" ? "Ranní předání" : "Večerní předání"}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="Jméno"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={form.author}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setForm({ ...form, author: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;textarea</p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder={form.type === "ranni" ? "Co je naplánováno, co bylo nahlášeno…" : "Co se dnes stihlo, co zůstává na zítra…"}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={form.text}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setForm({ ...form, text: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>rows={4}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none resize-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onClick={() =&gt; setForm({ type: null, author: form.author, text: "" })} className="flex-1 py-2 rounded-lg text-sm font-medium" style={{ background: C.panelAlt, color: C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>Zrušit</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onClick={submit} className="flex-1 py-2 rounded-lg text-sm font-semibold" style={{ background: C.amber, color: "#1B1E21" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>Uložit záznam</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.text }}&gt;Historie&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{log.length === 0 &amp;&amp; &lt;p className="text-sm" style={{ color: C.muted }}&gt;Zatím žádné záznamy.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{log.map((entry) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div key={entry.id} className="p-3 rounded-xl mb-2" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex items-center gap-2 mb-1 text-xs" style={{ color: C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{entry.type === "ranni" ? &lt;Sunrise size={14} color={C.amber} /&gt; : &lt;Sunset size={14} color="#6FA8DC" /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span className="font-semibold" style={{ color: C.text }}&gt;{entry.author}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span&gt;· {entry.date} {entry.time}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm"&gt;{entry.text}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function AreaBreakdown({ items }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const counts = {};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>items.forEach((i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(i.areas &amp;&amp; i.areas.length ? i.areas : ["mimoradne"]).forEach((a) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>counts[a] = (counts[a] || 0) + 1;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const entries = Object.entries(counts);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (entries.length === 0) return &lt;p className="text-xs" style={{ color: C.muted }}&gt;Zatím nic.&lt;/p&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="flex flex-wrap gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{entries.map(([area, count]) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const info = areaInfo(area);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span key={area} className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: info.color + "22", color: info.color, border: `1px solid ${info.color}55` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{info.label} · {count}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function SimpleListItem({ name, areas, category, note }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const list = areas &amp;&amp; areas.length ? areas : ["mimoradne"];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="flex items-start gap-2 p-2.5 rounded-lg mb-1.5" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex flex-col gap-0.5 mt-1 shrink-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{list.map((a) =&gt; &lt;span key={a} className="w-2 h-2 rounded-full" style={{ background: areaInfo(a).color }} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="flex-1 text-sm min-w-0"&gt;{name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{category &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Badge color={category === "indoor" ? "#6FA8DC" : category === "extra" ? C.red : C.amber}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{category === "indoor" ? "Vnitřní" : category === "extra" ? "Mimořádné" : "Venkovní"}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{note &amp;&amp; &lt;span className="text-xs shrink-0" style={{ color: C.muted }}&gt;{note}&lt;/span&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function MonthCalendar({ year, month, history, today, selectedDay, onSelectDay }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dim = daysInMonth(year, month);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7; // 0 = Monday</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cells = [...Array(firstWeekday).fill(null), ...Array.from({ length: dim }, (_, i) =&gt; i + 1)];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const countsByDay = {};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>history.forEach((h) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (h.date.startsWith(`${year}-${pad2(month)}`)) countsByDay[h.date] = (countsByDay[h.date] || 0) + 1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="grid grid-cols-7 gap-1 mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{dow.map((l) =&gt; &lt;div key={l} className="text-center text-xs font-medium" style={{ color: C.muted }}&gt;{l}&lt;/div&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="grid grid-cols-7 gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{cells.map((d, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (d === null) return &lt;div key={"b" + i} /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const isToday = dateStr === today;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const isSelected = dateStr === selectedDay;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const count = countsByDay[dateStr] || 0;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">              </span>key={dateStr}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>onClick={() =&gt; onSelectDay(dateStr === selectedDay ? null : dateStr)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>className="aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>background: isSelected ? C.amber + "33" : C.panelAlt,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>border: isToday ? `2px solid ${C.amber}` : `1px solid ${C.border}`,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>color: C.text,</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{d}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{count &gt; 0 &amp;&amp; &lt;span className="absolute bottom-1 w-1.5 h-1.5 rounded-full" style={{ background: C.green }} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function PrehledyTab({ tasks, history, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [period, setPeriod] = useState("mesic");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [cursor, setCursor] = useState(today); // reference date, lets you flip months</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [selectedDay, setSelectedDay] = useState(null);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cursorDate = new Date(cursor + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const year = cursorDate.getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = cursorDate.getMonth() + 1;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function shiftMonth(delta) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const d = new Date(year, month - 1 + delta, 1);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setCursor(d.toISOString().slice(0, 10));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setSelectedDay(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const periods = [</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "rok", label: "Rok" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "mesic", label: "Měsíc" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "tyden", label: "Týden" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "den", label: "Den" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex gap-2 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{periods.map((p) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">            </span>key={p.id}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onClick={() =&gt; setPeriod(p.id)}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="flex-1 py-2 rounded-xl text-sm font-semibold"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: period === p.id ? C.amber : C.panel, color: period === p.id ? "#1B1E21" : C.muted, border: `1px solid ${C.border}` }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{p.label}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "mesic" &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;MonthReport tasks={tasks} history={history} today={today} year={year} month={month} onShiftMonth={shiftMonth} selectedDay={selectedDay} setSelectedDay={setSelectedDay} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "tyden" &amp;&amp; &lt;WeekReport tasks={tasks} history={history} today={today} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "den" &amp;&amp; &lt;DayReport tasks={tasks} history={history} today={today} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "rok" &amp;&amp; &lt;YearReport tasks={tasks} history={history} today={today} year={year} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function MonthReport({ tasks, history, today, year, month, onShiftMonth, selectedDay, setSelectedDay }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [start, end] = monthRange(year, month);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const isCurrentMonth = start.slice(0, 7) === today.slice(0, 7);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const effectiveTodayInMonth = isCurrentMonth ? today : end;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const completed = completedInRange(history, start, effectiveTodayInMonth);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pending = pendingInRange(tasks, isCurrentMonth ? today : start, end, today).filter(</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(t) =&gt; !completed.some((c) =&gt; c.taskId === t.id)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const daysLeft = isCurrentMonth ? daysBetween(today, end) : null;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dayDetail = selectedDay ? history.filter((h) =&gt; h.date === selectedDay) : null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; onShiftMonth(-1)} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronLeft size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="stencil font-semibold capitalize" style={{ color: C.amber }}&gt;{MONTHS_FULL[month - 1]} {year}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; onShiftMonth(1)} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronRight size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="p-3 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;MonthCalendar year={year} month={month} history={history} today={today} selectedDay={selectedDay} onSelectDay={setSelectedDay} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{isCurrentMonth &amp;&amp; &lt;p className="text-xs mt-2 text-center" style={{ color: C.muted }}&gt;{daysLeft === 0 ? "Dnes měsíc končí." : `Do konce měsíce zbývá ${daysLeft} ${daysLeft === 1 ? "den" : daysLeft &lt; 5 ? "dny" : "dní"}.`}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{dayDetail &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2"&gt;Hotovo {selectedDay}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{dayDetail.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Ten den nic zaznamenáno.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{dayDetail.map((h) =&gt; &lt;SimpleListItem key={h.id} name={h.name} areas={h.areas} category={h.category} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.green }}&gt;Hotovo tento měsíc ({completed.length})&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;AreaBreakdown items={completed} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.amber }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{isCurrentMonth ? `Ještě zbývá do konce měsíce (${pending.length})` : `Bylo naplánováno (${pending.length})`}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{pending.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Nic nevisí — pěkná práce.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{pending.map((t) =&gt; &lt;SimpleListItem key={t.id} name={t.name} areas={t.areas} category={t.category} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function WeekReport({ tasks, history, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [cursor, setCursor] = useState(today);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [selectedDay, setSelectedDay] = useState(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const start = startOfWeek(cursor);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const end = endOfWeek(cursor);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const effectiveEnd = end &gt; today ? today : end; // don't count "completed" into the future</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const completed = completedInRange(history, start, effectiveEnd &lt; start ? start : effectiveEnd);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pending = pendingInRange(tasks, today &gt; start ? today : start, end, today).filter(</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(t) =&gt; !completed.some((c) =&gt; c.taskId === t.id)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const days = Array.from({ length: 7 }, (_, i) =&gt; addDaysStr(start, i));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const countsByDay = {};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>history.forEach((h) =&gt; { if (h.date &gt;= start &amp;&amp; h.date &lt;= end) countsByDay[h.date] = (countsByDay[h.date] || 0) + 1; });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dayDetail = selectedDay ? history.filter((h) =&gt; h.date === selectedDay) : null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function shiftWeek(delta) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setCursor(addDaysStr(cursor, delta * 7));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setSelectedDay(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; shiftWeek(-1)} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronLeft size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="stencil font-semibold" style={{ color: C.amber }}&gt;{start} – {end}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; shiftWeek(1)} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronRight size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="grid grid-cols-7 gap-1 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{days.map((d, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const isToday = d === today;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const isSelected = d === selectedDay;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">              </span>key={d}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>onClick={() =&gt; setSelectedDay(d === selectedDay ? null : d)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>className="flex flex-col items-center p-2 rounded-lg"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>background: isSelected ? C.amber + "33" : C.panel,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>border: `1px solid ${isToday ? C.amber : C.border}`,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>borderWidth: isToday ? 2 : 1,</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="text-xs" style={{ color: C.muted }}&gt;{dow[i]}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="text-sm font-semibold"&gt;{Number(d.slice(8, 10))}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{countsByDay[d] &gt; 0 &amp;&amp; &lt;span className="w-1.5 h-1.5 rounded-full mt-1" style={{ background: C.green }} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{dayDetail &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2"&gt;Hotovo {selectedDay}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{dayDetail.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Ten den nic zaznamenáno.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{dayDetail.map((h) =&gt; &lt;SimpleListItem key={h.id} name={h.name} areas={h.areas} category={h.category} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.green }}&gt;Hotovo tento týden ({completed.length})&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;AreaBreakdown items={completed} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.amber }}&gt;Ještě zbývá do konce týdne ({pending.length})&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{pending.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Nic nevisí.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{pending.map((t) =&gt; &lt;SimpleListItem key={t.id} name={t.name} areas={t.areas} category={t.category} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function DayReport({ tasks, history, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = new Date(today + "T00:00:00").getMonth() + 1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const completedToday = completedInRange(history, today, today);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dueToday = tasks.filter((t) =&gt; isSeasonActive(t, month) &amp;&amp; isDue(t, today));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm mb-4" style={{ color: C.muted }}&gt;Denní přehled — {today}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.green }}&gt;Hotovo dnes ({completedToday.length})&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{completedToday.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Zatím nic — den teprve začíná.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{completedToday.map((h) =&gt; &lt;SimpleListItem key={h.id} name={h.name} areas={h.areas} category={h.category} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.amber }}&gt;Na řadě dnes ({dueToday.length})&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{dueToday.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Nic plánovaného — mrkněte do záložky Dnes na tipy navíc.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{dueToday.map((t) =&gt; &lt;SimpleListItem key={t.id} name={t.name} areas={t.areas} category={t.category} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function YearReport({ tasks, history, today, year }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = new Date(today + "T00:00:00").getMonth() + 1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const monthCounts = MONTHS.map((_, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const [s, e] = monthRange(year, i + 1);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return completedInRange(history, s, e).length;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const max = Math.max(1, ...monthCounts);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const yearCompleted = completedInRange(history, `${year}-01-01`, `${year}-12-31`);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const upcoming = tasks</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.filter((t) =&gt; t.months &amp;&amp; t.months.length &gt; 0 &amp;&amp; t.months.some((m) =&gt; m &gt; month))</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.sort((a, b) =&gt; Math.min(...a.months.filter((m) =&gt; m &gt; month)) - Math.min(...b.months.filter((m) =&gt; m &gt; month)));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm mb-3" style={{ color: C.muted }}&gt;Rok {year} · celkem hotovo {yearCompleted.length} úkolů&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="p-3 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="flex items-end gap-1" style={{ height: 90 }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{monthCounts.map((c, i) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div key={i} className="flex-1 flex flex-col items-center justify-end h-full"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="w-full rounded-t"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>style={{ height: `${(c / max) * 100}%`, minHeight: c &gt; 0 ? 4 : 0, background: i + 1 === month ? C.amber : C.panelAlt, border: `1px solid ${C.border}` }}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="text-xs mt-1" style={{ color: i + 1 === month ? C.amber : C.muted }}&gt;{MONTHS[i]}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.green }}&gt;Rozložení podle míst za rok&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;AreaBreakdown items={yearCompleted} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: C.amber }}&gt;Co se blíží zbytek roku&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{upcoming.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;Nic sezónního dál v katalogu.&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{upcoming.map((t) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;SimpleListItem key={t.id} name={t.name} areas={t.areas} category={t.category} note={MONTHS[Math.min(...t.months.filter((m) =&gt; m &gt; month)) - 1]} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// ---------- Výkaz práce (elektronické píchačky) ----------</p>
+<p class="p1">function fmtHM(hours) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const h = Math.floor(hours);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const m = Math.round((hours - h) * 60);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return `${h}:${String(m).padStart(2, "0")}`;</p>
+<p class="p1">}</p>
+<p class="p1">function fmtCzk(n) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return Math.round(n).toLocaleString("cs-CZ") + " Kč";</p>
+<p class="p1">}</p>
+<p class="p1">function fmtTime(iso) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return new Date(iso).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });</p>
+<p class="p1">}</p>
+<p class="p1">function sessionRate(s, wageSettings) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return s.rate || wageSettings.areaRates[s.area] || wageSettings.defaultRate;</p>
+<p class="p1">}</p>
+<p class="p1">function sessionHours(s) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (s.hours != null) return s.hours;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (Date.now() - new Date(s.start).getTime()) / 3600000;</p>
+<p class="p1">}</p>
+<p class="p1">function sessionWage(s, wageSettings) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (s.wage != null) return s.wage;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return sessionHours(s) * sessionRate(s, wageSettings);</p>
+<p class="p1">}</p>
+<p class="p1">function sessionsInRange(sessions, start, end) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return sessions.filter((s) =&gt; s.date &gt;= start &amp;&amp; s.date &lt;= end);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function WageBreakdown({ sessions, wageSettings }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const totals = {};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>sessions.forEach((s) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>totals[s.area] = (totals[s.area] || 0) + sessionHours(s);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const entries = Object.entries(totals);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (entries.length === 0) return &lt;p className="text-xs" style={{ color: C.muted }}&gt;Zatím nic.&lt;/p&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="flex flex-wrap gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{entries.map(([area, hrs]) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const info = areaInfo(area);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span key={area} className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: info.color + "22", color: info.color, border: `1px solid ${info.color}55` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{info.label} · {fmtHM(hrs)} h</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function ShiftRow({ s, wageSettings, onDelete }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const hrs = sessionHours(s);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const wage = sessionWage(s, wageSettings);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="flex items-center gap-3 p-3 rounded-xl mb-2" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span className="w-2 h-2 rounded-full shrink-0" style={{ background: areaInfo(s.area).color }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex-1 min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-medium"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{fmtTime(s.start)} – {s.end ? fmtTime(s.end) : "probíhá"} &lt;span style={{ color: C.muted }}&gt;({areaInfo(s.area).label})&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-xs" style={{ color: C.muted }}&gt;{fmtHM(hrs)} h · {fmtCzk(wage)}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{onDelete &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; onDelete(s.id)}&gt;&lt;Trash2 size={16} color={C.muted} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RateSettings({ wageSettings, onUpdateRates }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [open, setOpen] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [draft, setDraft] = useState(wageSettings);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function save() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>onUpdateRates(draft);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setOpen(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">        </span>onClick={() =&gt; { setDraft(wageSettings); setOpen((o) =&gt; !o); }}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="flex items-center gap-2 text-sm font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>style={{ color: C.muted }}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Settings2 size={15} /&gt; Nastavení sazeb {open ? &lt;X size={14} /&gt; : null}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{open &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="p-3 rounded-xl mt-2" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Základní sazba (Kč/hod)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">            </span>type="number"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={draft.defaultRate}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setDraft({ ...draft, defaultRate: Number(e.target.value) })}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs mb-2" style={{ color: C.muted }}&gt;Vlastní sazba pro jednotlivé činnosti (nepovinné, prázdné = základní sazba)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{AREAS.map((a) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div key={a.id} className="flex items-center gap-2 mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="text-xs flex-1" style={{ color: a.color }}&gt;{a.label}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type="number"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>placeholder={String(draft.defaultRate)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>value={draft.areaRates[a.id] ?? ""}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onChange={(e) =&gt; setDraft({ ...draft, areaRates: { ...draft.areaRates, [a.id]: e.target.value === "" ? null : Number(e.target.value) } })}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="w-24 px-2 py-1.5 rounded-lg text-sm outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button onClick={save} className="w-full py-2 rounded-lg font-semibold text-sm mt-1" style={{ background: C.green, color: "#1B1E21" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Uložit sazby</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function PunchCard({ active, wageSettings, onStart, onEnd }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [pickArea, setPickArea] = useState("obecne");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [, forceTick] = useState(0);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!active) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const id = setInterval(() =&gt; forceTick((t) =&gt; t + 1), 15000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return () =&gt; clearInterval(id);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [active]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (active) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const hrs = sessionHours(active);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const wage = sessionWage(active, wageSettings);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="p-4 rounded-xl mb-4" style={{ background: C.green + "15", border: `1px solid ${C.green}55` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Na směně od {fmtTime(active.start)} · {areaInfo(active.area).label}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="stencil text-2xl font-bold mb-3" style={{ color: C.green }}&gt;{fmtHM(hrs)} h &lt;span className="text-base font-medium" style={{ color: C.text }}&gt;· {fmtCzk(wage)}&lt;/span&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={onEnd} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold" style={{ background: C.red, color: "#fff" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;StopCircle size={20} /&gt; Ukončit směnu</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="p-4 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-xs mb-2" style={{ color: C.muted }}&gt;Mimo směnu — na čem začínáte pracovat?&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;select</p>
+<p class="p1"><span class="Apple-converted-space">        </span>value={pickArea}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>onChange={(e) =&gt; setPickArea(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{AREAS.map((a) =&gt; &lt;option key={a.id} value={a.id}&gt;{a.label}&lt;/option&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onClick={() =&gt; onStart(pickArea)} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold" style={{ background: C.amber, color: "#1B1E21" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;PlayCircle size={20} /&gt; Začít směnu</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function VykazTab({ sessions, wageSettings, today, onStart, onEnd, onDelete, onUpdateRates }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [period, setPeriod] = useState("den");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const active = sessions.find((s) =&gt; !s.end);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const periods = [</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "rok", label: "Rok" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "mesic", label: "Měsíc" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "tyden", label: "Týden" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ id: "den", label: "Den" },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;PunchCard active={active} wageSettings={wageSettings} onStart={onStart} onEnd={onEnd} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;RateSettings wageSettings={wageSettings} onUpdateRates={onUpdateRates} /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex gap-2 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{periods.map((p) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">            </span>key={p.id}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onClick={() =&gt; setPeriod(p.id)}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>className="flex-1 py-2 rounded-xl text-sm font-semibold"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: period === p.id ? C.amber : C.panel, color: period === p.id ? "#1B1E21" : C.muted, border: `1px solid ${C.border}` }}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{p.label}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "den" &amp;&amp; &lt;VykazPeriod sessions={sessionsInRange(sessions, today, today)} wageSettings={wageSettings} onDelete={onDelete} emptyLabel="Dnes zatím žádná odpracovaná doba." /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "tyden" &amp;&amp; &lt;VykazPeriod sessions={sessionsInRange(sessions, startOfWeek(today), endOfWeek(today))} wageSettings={wageSettings} onDelete={onDelete} emptyLabel="Tento týden zatím nic." rangeLabel={`${startOfWeek(today)} – ${endOfWeek(today)}`} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "mesic" &amp;&amp; (() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const [s, e] = monthRange(new Date(today).getFullYear(), new Date(today).getMonth() + 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return &lt;VykazPeriod sessions={sessionsInRange(sessions, s, e)} wageSettings={wageSettings} onDelete={onDelete} emptyLabel="Tento měsíc zatím nic." rangeLabel={`${MONTHS_FULL[new Date(today).getMonth()]} ${new Date(today).getFullYear()}`} /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})()}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "rok" &amp;&amp; (() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const year = new Date(today).getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return &lt;VykazPeriod sessions={sessionsInRange(sessions, `${year}-01-01`, `${year}-12-31`)} wageSettings={wageSettings} onDelete={onDelete} emptyLabel="Letos zatím nic." rangeLabel={String(year)} /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})()}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function VykazPeriod({ sessions, wageSettings, onDelete, emptyLabel, rangeLabel }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const totalHours = sessions.reduce((sum, s) =&gt; sum + sessionHours(s), 0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const totalWage = sessions.reduce((sum, s) =&gt; sum + sessionWage(s, wageSettings), 0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sorted = [...sessions].sort((a, b) =&gt; (a.start &lt; b.start ? 1 : -1));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{rangeLabel &amp;&amp; &lt;p className="text-sm mb-3" style={{ color: C.muted }}&gt;{rangeLabel}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="p-4 rounded-xl mb-4 flex items-center justify-between" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs" style={{ color: C.muted }}&gt;Odpracováno&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="stencil text-xl font-bold" style={{ color: C.text }}&gt;{fmtHM(totalHours)} h&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="text-right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs" style={{ color: C.muted }}&gt;Celkem&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="stencil text-xl font-bold flex items-center gap-1" style={{ color: C.amber }}&gt;&lt;Wallet size={18} /&gt;{fmtCzk(totalWage)}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2"&gt;Podle činnosti&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;WageBreakdown sessions={sessions} wageSettings={wageSettings} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold mb-2"&gt;Jednotlivé směny&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{sorted.length === 0 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;{emptyLabel}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{sorted.map((s) =&gt; &lt;ShiftRow key={s.id} s={s} wageSettings={wageSettings} onDelete={s.end ? onDelete : null} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// ---------- Rozvrh (KDY × KDE × ROLE × CO) ----------</p>
+<p class="p1">function ruleActiveOnDate(rule, dateStr) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!rule.days || rule.days.length === 0) return false; // on-demand rules aren't date-bound</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dow = isoDow(dateStr);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = new Date(dateStr + "T00:00:00").getMonth() + 1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const monthsOk = !rule.months || rule.months.length === 0 || rule.months.includes(month);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return rule.days.includes(dow) &amp;&amp; monthsOk;</p>
+<p class="p1">}</p>
+<p class="p1">function scheduledRules(rules) { return rules.filter((r) =&gt; r.days &amp;&amp; r.days.length &gt; 0); }</p>
+<p class="p1">function onDemandRules(rules) { return rules.filter((r) =&gt; !r.days || r.days.length === 0); }</p>
+<p class="p2"><br></p>
+<p class="p1">function matchingTasks(tasks, rule, dateStr) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = new Date(dateStr + "T00:00:00").getMonth() + 1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return tasks.filter(</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(t) =&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>t.role === rule.role &amp;&amp;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>(rule.areas.length === 0 || (t.areas || []).some((a) =&gt; rule.areas.includes(a))) &amp;&amp;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>isSeasonActive(t, month)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RuleBlock({ rule, tasks, dateStr }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const info = roleInfo(rule.role);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const related = dateStr ? matchingTasks(tasks, rule, dateStr) : [];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="p-3 rounded-xl mb-2" style={{ background: C.panel, border: `1px solid ${C.border}`, borderLeft: `4px solid ${info.color}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between flex-wrap gap-1 mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="text-sm font-semibold"&gt;{rule.label}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{(rule.timeStart || rule.timeEnd) &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="text-xs font-medium" style={{ color: info.color }}&gt;{rule.timeStart}–{rule.timeEnd}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex flex-wrap gap-1 mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Badge color={info.color}&gt;{info.label}&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{rule.areas.map((a) =&gt; &lt;Badge key={a} color={areaInfo(a).color}&gt;{areaInfo(a).label}&lt;/Badge&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{rule.subject &amp;&amp; &lt;Badge color={C.muted}&gt;{rule.subject}&lt;/Badge&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{rule.note &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;{rule.note}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{related.length &gt; 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="mt-2 pt-2" style={{ borderTop: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-xs font-medium mb-1" style={{ color: C.muted }}&gt;Co konkrétně (z katalogu):&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{related.slice(0, 4).map((t) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p key={t.id} className="text-xs" style={{ color: C.text }}&gt;• {t.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{related.length &gt; 4 &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;+ {related.length - 4} dalších v Katalogu&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function DayAgenda({ rules, tasks, dateStr }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const active = scheduledRules(rules).filter((r) =&gt; ruleActiveOnDate(r, dateStr))</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.sort((a, b) =&gt; (a.timeStart || "").localeCompare(b.timeStart || ""));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (active.length === 0) return &lt;p className="text-sm" style={{ color: C.muted }}&gt;Ten den nemá žádný pravidelný blok.&lt;/p&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return &lt;div&gt;{active.map((r) =&gt; &lt;RuleBlock key={r.id} rule={r} tasks={tasks} dateStr={dateStr} /&gt;)}&lt;/div&gt;;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RozvrhDen({ tasks, scheduleRules, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [cursor, setCursor] = useState(today);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dow = DOW[isoDow(cursor) - 1];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; setCursor(addDaysStr(cursor, -1))} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronLeft size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="stencil font-semibold" style={{ color: C.amber }}&gt;{dow} {cursor}{cursor === today ? " · dnes" : ""}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; setCursor(addDaysStr(cursor, 1))} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronRight size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;DayAgenda rules={scheduleRules} tasks={tasks} dateStr={cursor} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RozvrhTyden({ tasks, scheduleRules, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [cursor, setCursor] = useState(today);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const start = startOfWeek(cursor);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const days = Array.from({ length: 7 }, (_, i) =&gt; addDaysStr(start, i));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; setCursor(addDaysStr(cursor, -7))} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronLeft size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="stencil font-semibold" style={{ color: C.amber }}&gt;{start} – {endOfWeek(cursor)}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; setCursor(addDaysStr(cursor, 7))} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronRight size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{days.map((d, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const active = scheduledRules(scheduleRules).filter((r) =&gt; ruleActiveOnDate(r, d))</p>
+<p class="p1"><span class="Apple-converted-space">          </span>.sort((a, b) =&gt; (a.timeStart || "").localeCompare(b.timeStart || ""));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div key={d} className="mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p className="text-xs font-semibold mb-1" style={{ color: d === today ? C.amber : C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{DOW[i]} {Number(d.slice(8, 10))}. {d === today ? "· dnes" : ""}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{active.length === 0 ? (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;p className="text-xs pl-2" style={{ color: C.muted }}&gt;—&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>active.map((r) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const info = roleInfo(r.role);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div key={r.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg mb-1" style={{ background: C.panel, borderLeft: `3px solid ${info.color}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span className="text-xs font-medium shrink-0" style={{ color: info.color }}&gt;{r.timeStart}–{r.timeEnd}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span className="text-xs flex-1 truncate"&gt;{r.label}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>})</p>
+<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RozvrhMesic({ tasks, scheduleRules, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [cursor, setCursor] = useState(today);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [selectedDay, setSelectedDay] = useState(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cursorDate = new Date(cursor + "T00:00:00");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const year = cursorDate.getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const month = cursorDate.getMonth() + 1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dim = daysInMonth(year, month);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cells = [...Array(firstWeekday).fill(null), ...Array.from({ length: dim }, (_, i) =&gt; i + 1)];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function shift(delta) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const d = new Date(year, month - 1 + delta, 1);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setCursor(d.toISOString().slice(0, 10));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setSelectedDay(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center justify-between mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; shift(-1)} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronLeft size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p className="stencil font-semibold capitalize" style={{ color: C.amber }}&gt;{MONTHS_FULL[month - 1]} {year}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; shift(1)} className="p-2 rounded-lg" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;&lt;ChevronRight size={16} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="p-3 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="grid grid-cols-7 gap-1 mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{DOW.map((l) =&gt; &lt;div key={l} className="text-center text-xs font-medium" style={{ color: C.muted }}&gt;{l}&lt;/div&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="grid grid-cols-7 gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{cells.map((d, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (d === null) return &lt;div key={"b" + i} /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const rolesActive = [...new Set(scheduledRules(scheduleRules).filter((r) =&gt; ruleActiveOnDate(r, dateStr)).map((r) =&gt; r.role))];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const isToday = dateStr === today;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const isSelected = dateStr === selectedDay;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                </span>key={dateStr}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onClick={() =&gt; setSelectedDay(dateStr === selectedDay ? null : dateStr)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>style={{ background: isSelected ? C.amber + "33" : C.panelAlt, border: isToday ? `2px solid ${C.amber}` : `1px solid ${C.border}` }}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{d}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex gap-0.5 absolute bottom-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{rolesActive.slice(0, 3).map((r) =&gt; &lt;span key={r} className="w-1.5 h-1.5 rounded-full" style={{ background: roleInfo(r).color }} /&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{selectedDay &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p className="text-sm font-semibold mb-2"&gt;{selectedDay}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;DayAgenda rules={scheduleRules} tasks={tasks} dateStr={selectedDay} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RozvrhRok({ scheduleRules, today }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const year = new Date(today).getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const scheduled = scheduledRules(scheduleRules);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const rolesUsed = [...new Set(scheduled.map((r) =&gt; r.role))];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm mb-3" style={{ color: C.muted }}&gt;Sezónní rytmus rolí — {year}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{rolesUsed.map((roleId) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const info = roleInfo(roleId);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const rulesOfRole = scheduled.filter((r) =&gt; r.role === roleId);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const monthsActive = new Set();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>rulesOfRole.forEach((r) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>if (!r.months || r.months.length === 0) MONTHS.forEach((_, i) =&gt; monthsActive.add(i + 1));</p>
+<p class="p1"><span class="Apple-converted-space">          </span>else r.months.forEach((m) =&gt; monthsActive.add(m));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div key={roleId} className="mb-3 p-3 rounded-xl" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p className="text-sm font-semibold mb-2" style={{ color: info.color }}&gt;{info.label}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{MONTHS.map((m, i) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div key={m} className="flex-1 flex flex-col items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="w-full rounded" style={{ height: 20, background: monthsActive.has(i + 1) ? info.color : C.panelAlt }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;span className="text-[10px] mt-1" style={{ color: C.muted }}&gt;{m}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm font-semibold mt-4 mb-2" style={{ color: C.text }}&gt;Bez pevného rozvrhu (dle potřeby)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{onDemandRules(scheduleRules).map((r) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const info = roleInfo(r.role);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div key={r.id} className="p-3 rounded-xl mb-2" style={{ background: C.panel, border: `1px solid ${C.border}`, borderLeft: `4px solid ${info.color}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex items-center gap-2 mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Badge color={info.color}&gt;{info.label}&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;p className="text-sm font-medium"&gt;{r.label}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{r.note &amp;&amp; &lt;p className="text-xs" style={{ color: C.muted }}&gt;{r.note}&lt;/p&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RuleForm({ onAdd, onClose }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [form, setForm] = useState({ label: "", role: "udrzbar", days: [], months: [], timeStart: "08:00", timeEnd: "12:00", areas: [], subject: "", note: "" });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>function toggle(field, val) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setForm((f) =&gt; ({ ...f, [field]: f[field].includes(val) ? f[field].filter((x) =&gt; x !== val) : [...f[field], val] }));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>function submit() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!form.label.trim()) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>onAdd(form);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>onClose();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="p-4 rounded-xl mb-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input placeholder="Název bloku (např. Dílna s dětmi)" value={form.label} onChange={(e) =&gt; setForm({ ...form, label: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none" style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;V jaké roli&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;select value={form.role} onChange={(e) =&gt; setForm({ ...form, role: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none" style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ROLES.map((r) =&gt; &lt;option key={r.id} value={r.id}&gt;{r.label}&lt;/option&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Dny (nic = bez pevného dne / dle potřeby)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex flex-wrap gap-1 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{DOW.map((d, i) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button key={d} onClick={() =&gt; toggle("days", i + 1)} className="px-2 py-1 rounded-md text-xs font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: form.days.includes(i + 1) ? C.amber : C.panelAlt, color: form.days.includes(i + 1) ? "#1B1E21" : C.muted }}&gt;{d}&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex gap-2 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="time" value={form.timeStart} onChange={(e) =&gt; setForm({ ...form, timeStart: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="time" value={form.timeEnd} onChange={(e) =&gt; setForm({ ...form, timeEnd: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Sezóna (nic = celoročně)&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex flex-wrap gap-1 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{MONTHS.map((m, i) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button key={m} onClick={() =&gt; toggle("months", i + 1)} className="px-2 py-1 rounded-md text-xs font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: form.months.includes(i + 1) ? C.amber : C.panelAlt, color: form.months.includes(i + 1) ? "#1B1E21" : C.muted }}&gt;{m}&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-xs mb-1" style={{ color: C.muted }}&gt;Kde&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex flex-wrap gap-1 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{AREAS.map((a) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button key={a.id} onClick={() =&gt; toggle("areas", a.id)} className="px-2 py-1 rounded-md text-xs font-medium"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: form.areas.includes(a.id) ? a.color : C.panelAlt, color: form.areas.includes(a.id) ? "#fff" : C.muted }}&gt;{a.label}&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input placeholder="Pro koho / subjekt (nepovinné)" value={form.subject} onChange={(e) =&gt; setForm({ ...form, subject: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none" style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input placeholder="Poznámka" value={form.note} onChange={(e) =&gt; setForm({ ...form, note: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="w-full px-3 py-2 rounded-lg text-sm mb-3 outline-none" style={{ background: C.panelAlt, border: `1px solid ${C.border}`, color: C.text }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onClick={submit} className="w-full py-2 rounded-lg font-semibold text-sm" style={{ background: C.green, color: "#1B1E21" }}&gt;Uložit blok&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function RozvrhTab({ tasks, scheduleRules, today, onAddRule, onDeleteRule }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [period, setPeriod] = useState("den");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [showForm, setShowForm] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [showAdmin, setShowAdmin] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const periods = [{ id: "rok", label: "Rok" }, { id: "mesic", label: "Měsíc" }, { id: "tyden", label: "Týden" }, { id: "den", label: "Den" }];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p className="text-sm mb-4" style={{ color: C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Kdy × kde × pro koho × v jaké roli × co konkrétně — appka sama poskládá, co je na řadě.</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex gap-2 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{periods.map((p) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button key={p.id} onClick={() =&gt; setPeriod(p.id)} className="flex-1 py-2 rounded-xl text-sm font-semibold"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>style={{ background: period === p.id ? C.amber : C.panel, color: period === p.id ? "#1B1E21" : C.muted, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{p.label}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "den" &amp;&amp; &lt;RozvrhDen tasks={tasks} scheduleRules={scheduleRules} today={today} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "tyden" &amp;&amp; &lt;RozvrhTyden tasks={tasks} scheduleRules={scheduleRules} today={today} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "mesic" &amp;&amp; &lt;RozvrhMesic tasks={tasks} scheduleRules={scheduleRules} today={today} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{period === "rok" &amp;&amp; &lt;RozvrhRok scheduleRules={scheduleRules} today={today} /&gt;}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="mt-6 pt-4" style={{ borderTop: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; setShowAdmin((o) =&gt; !o)} className="flex items-center gap-2 text-sm font-medium" style={{ color: C.muted }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Settings2 size={15} /&gt; Upravit rozvrh {showAdmin ? &lt;X size={14} /&gt; : null}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{showAdmin &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="mt-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{!showForm &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button onClick={() =&gt; setShowForm(true)} className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-semibold mb-3" style={{ background: C.amber, color: "#1B1E21" }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Plus size={16} /&gt; Přidat blok</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{showForm &amp;&amp; &lt;RuleForm onAdd={onAddRule} onClose={() =&gt; setShowForm(false)} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{scheduleRules.map((r) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>const info = roleInfo(r.role);</p>
+<p class="p1"><span class="Apple-converted-space">              </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div key={r.id} className="flex items-center gap-2 p-2.5 rounded-lg mb-1.5" style={{ background: C.panel, border: `1px solid ${C.border}` }}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;span className="w-2 h-2 rounded-full shrink-0" style={{ background: info.color }} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className="flex-1 text-sm truncate"&gt;{r.label}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button onClick={() =&gt; onDeleteRule(r.id)}&gt;&lt;Trash2 size={16} color={C.muted} /&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+</body>
+</html>
