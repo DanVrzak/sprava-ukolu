@@ -1,106 +1,352 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="cs">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikace Správa Úkolů (React)</title>
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel standalone pro transpilation JSX v prohlížeči -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 16px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 640px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-add {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #1d4ed8;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            background: #f8fafc;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: white;
+            color: #2563eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .task-item:hover {
+            border-color: #cbd5e1;
+            background: white;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #2563eb;
+        }
+
+        .task-text {
+            font-size: 1rem;
+            color: #334155;
+            word-break: break-word;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: opacity 0.2s, background 0.2s;
+        }
+
+        .btn-delete:hover {
+            opacity: 1;
+            background: #fee2e2;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="cs"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Správa úkolů&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Ikonky Lucide pro web --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/lucide@latest"&gt;&lt;/script&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body class="bg-slate-950 text-slate-100 min-h-screen p-4 flex flex-col items-center justify-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="root"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script type="text/babel"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const { useState, useEffect } = React;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function App() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [tasks, setTasks] = useState([</p>
-<p class="p1"><span class="Apple-converted-space">        </span>{ id: 1, text: "První vzorový úkol", done: false },</p>
-<p class="p1"><span class="Apple-converted-space">        </span>{ id: 2, text: "Vyzkoušet aplikaci", done: true }</p>
-<p class="p1"><span class="Apple-converted-space">      </span>]);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [input, setInput] = useState("");</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const addTask = (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>e.preventDefault();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!input.trim()) return;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTasks([...tasks, { id: Date.now(), text: input, done: false }]);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setInput("");</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const toggleTask = (id) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTasks(tasks.map(t =&gt; t.id === id ? { ...t, done: !t.done } : t));</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const deleteTask = (id) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTasks(tasks.filter(t =&gt; t.id !== id));</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;h1 class="text-2xl font-bold mb-4 text-center text-slate-100 flex items-center justify-center gap-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>📋 Správa úkolů</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/h1&gt;</p>
-<p class="p2"><span class="Apple-converted-space">          </span></p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;form onSubmit={addTask} class="flex gap-2 mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;input<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">              </span>type="text"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">              </span>value={input}</p>
-<p class="p1"><span class="Apple-converted-space">              </span>onChange={(e) =&gt; setInput(e.target.value)}</p>
-<p class="p1"><span class="Apple-converted-space">              </span>placeholder="Přidat nový úkol..."<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">              </span>class="flex-1 bg-slate-800 border border-slate-700 text-slate-100 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500"</p>
-<p class="p1"><span class="Apple-converted-space">            </span>/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>Přidat</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/form&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="space-y-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{tasks.map(task =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;div key={task.id} class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;span<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                  </span>onClick={() =&gt; toggleTask(task.id)}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>class={`cursor-pointer flex-1 ${task.done ? 'line-through text-slate-500' : 'text-slate-200'}`}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>{task.text}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                  </span>onClick={() =&gt; deleteTask(task.id)}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>class="text-red-400 hover:text-red-300 ml-2 p-1"</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>✕</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>))}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{tasks.length === 0 &amp;&amp; (</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;p class="text-center text-slate-500 py-4"&gt;Žádné úkoly. Zadejte nový nahoru!&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const root = ReactDOM.createRoot(document.getElementById('root'));</p>
-<p class="p1"><span class="Apple-converted-space">    </span>root.render(&lt;App /&gt;);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [tasks, setTasks] = useState(() => {
+                const saved = localStorage.getItem('react_tasks');
+                return saved ? JSON.parse(saved) : [
+                    { id: 1, text: 'Nainstalovat React a vyzkoušet komponenty', completed: true },
+                    { id: 2, text: 'Vytvořit funkční Todo aplikaci', completed: false }
+                ];
+            });
+            const [input, setInput] = useState('');
+            const [filter, setFilter] = useState('all');
+
+            useEffect(() => {
+                localStorage.setItem('react_tasks', JSON.stringify(tasks));
+            }, [tasks]);
+
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            });
+
+            const addTask = (e) => {
+                e.preventDefault();
+                if (!input.trim()) return;
+                const newTask = {
+                    id: Date.now(),
+                    text: input.trim(),
+                    completed: false
+                };
+                setTasks([newTask, ...tasks]);
+                setInput('');
+            };
+
+            const toggleTask = (id) => {
+                setTasks(tasks.map(task => 
+                    task.id === id ? { ...task, completed: !task.completed } : task
+                ));
+            };
+
+            const deleteTask = (id) => {
+                setTasks(tasks.filter(task => task.id !== id));
+            };
+
+            const filteredTasks = tasks.filter(task => {
+                if (filter === 'active') return !task.completed;
+                if (filter === 'completed') return task.completed;
+                return true;
+            });
+
+            const completedCount = tasks.filter(t => t.completed).length;
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>
+                            <i data-lucide="check-square" style={{color: '#2563eb'}}></i>
+                            Správa Úkolů
+                        </h1>
+                        <span className="stats-badge">
+                            {completedCount} / {tasks.length} hotovo
+                        </span>
+                    </div>
+
+                    <form onSubmit={addTask} className="input-group">
+                        <input
+                            type="text"
+                            placeholder="Co je potřeba udělat?"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                        />
+                        <button type="submit" className="btn-add">
+                            <i data-lucide="plus" style={{width: '18px', height: '18px'}}></i>
+                            Přidat
+                        </button>
+                    </form>
+
+                    <div className="filter-group">
+                        <button 
+                            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                            onClick={() => setFilter('all')}
+                        >
+                            Všechny
+                        </button>
+                        <button 
+                            className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
+                            onClick={() => setFilter('active')}
+                        >
+                            Aktivní
+                        </button>
+                        <button 
+                            className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
+                            onClick={() => setFilter('completed')}
+                        >
+                            Dokončené
+                        </button>
+                    </div>
+
+                    {filteredTasks.length > 0 ? (
+                        <ul className="task-list">
+                            {filteredTasks.map(task => (
+                                <li key={task.id} className={`task-item ${task.completed ? 'completed' : ''}`}>
+                                    <div className="task-left">
+                                        <input
+                                            type="checkbox"
+                                            className="checkbox"
+                                            checked={task.completed}
+                                            onChange={() => toggleTask(task.id)}
+                                        />
+                                        <span className="task-text">{task.text}</span>
+                                    </div>
+                                    <button 
+                                        className="btn-delete" 
+                                        onClick={() => deleteTask(task.id)}
+                                        title="Smazat úkol"
+                                    >
+                                        <i data-lucide="trash-2" style={{width: '18px', height: '18px'}}></i>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="empty-state">
+                            {filter === 'completed' 
+                                ? 'Žádné dokončené úkoly.' 
+                                : filter === 'active' 
+                                ? 'Žádné aktivní úkoly.' 
+                                ? 'Seznam úkolů je prázdný.'}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 </body>
 </html>
