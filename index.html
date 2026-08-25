@@ -38,19 +38,42 @@
       { id: "vrchlabi", label: "Vrchlabí 172", color: "#9A8B3F" }
     ];
 
-    // Obohačený katalog systémových a mikro-detailních úkolů
+    // Kompletní katalog úkolů rozdělený precizně podle všech 6 objektů
     const SEED_TASKS = [
-      { id: "v1", name: "Větrání teepee / jurty & kontrola vlhkosti plachty", role: "udrzbar", category: "indoor", areas: ["komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8, 9, 10], interval: 1, notes: "Školní prostor, Jurta: Při dešti zavřít, v topné sezóně větrat proti plísním.", lastDone: null },
-      { id: "v1_heat", name: "Ranní zátop v jurtě a mobilheimu (při t < 18°C)", role: "udrzbar", category: "indoor", areas: ["skolni"], months: [9, 10, 11, 12, 1, 2, 3, 4], interval: 1, notes: "Zatopit před příchodem dětí do 7:30.", lastDone: null },
-      { id: "v2", name: "Zalévání záhonů, květin a stromků (podvečer po 16:45)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [4, 5, 6, 7, 8, 9], interval: 2, notes: "Pokud pršelo >5mm, zalévat jen truhlíky pod střechou. Zalévat až po 16:45.", lastDone: null },
-      { id: "v3", name: "Sekání trávy (Srpnový střih 5-6 cm)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [4, 5, 6, 7, 8, 9, 10], interval: 10, notes: "Konec srpna: výška 5-6 cm (prevence žloutnutí). Za deště ZÁKAZ sekání!", lastDone: null },
-      { id: "v3_fruit", name: "Sběr padaného ovoce u hřiště (prevence vos)", role: "udrzbar", category: "outdoor", areas: ["skolni", "komunitni"], months: [8, 9], interval: 1, notes: "Prioritně u dětí kvůli bodnutí vosou. Prořez stromů až po sklizni.", lastDone: null },
-      { id: "v4", name: "Štípání a rovnání dřeva pod střechu", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [8, 9, 10], interval: 14, notes: "Chystat min. 1 měsíc předem, aby dřevo řádně proschlo.", lastDone: null },
-      { id: "v5", name: "Kontrola a zátěžová zkouška herních prvků", role: "udrzbar", category: "outdoor", areas: ["skolni"], months: [3, 4, 5, 6, 7, 8, 9, 10, 11], interval: 7, notes: "Každé pondělí: zatížení vlastní vahou, kontrola dopadových ploch a čepů.", lastDone: null },
-      { id: "v6", name: "Čištění okapů a svodů (Altán, Kancelář, Maringotka)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5, 9, 10, 11], interval: 30, notes: "Žebřík stavět v poměru 1:4, opírat nad okap. Jen za bezvětří!", lastDone: null },
-      { id: "v7", name: "Dílna: Údržba techniky (sekačky, křovinořezy)", role: "udrzbar", category: "indoor", areas: ["safran"], months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], interval: 30, notes: "Záložní práce na deštivé dny: olej, svíčky, broušení nožů, výměna strun.", lastDone: null },
-      { id: "v8_revize", name: "Elektroinstalace & Revize (Mobilheim, Kuchyňka)", role: "udrzbar", category: "indoor", areas: ["skolni", "safran"], months: [8], interval: 180, notes: "Před 1.9. kontrola zapojení a revizí! Venku jen krytí IP44 a kabely s vůlí.", lastDone: null },
-      { id: "v9_zazimovani", name: "Zazimování / Odzimování vody (Hraštice & Vrchlabí)", role: "udrzbar", category: "outdoor", areas: ["hrastice", "vrchlabi"], months: [4, 10], interval: 180, notes: "Vypustit ventily, profouknout potrubí, nemrznoucí směs do sifonů.", lastDone: null }
+      // --- ŠAFRÁN (Dílna, Technické zázemí) ---
+      { id: "v7", name: "Dílna: Údržba techniky (sekačky, křovinořezy)", role: "udrzbar", category: "indoor", areas: ["safran"], months: [], interval: 30, notes: "Kontrola oleje, svíček, nabití aku baterií, broušení nožů sekaček.", lastDone: null },
+      { id: "s1", name: "Šafrán: Kontrola a čištění lapačů tuku a odpadů", role: "udrzbar", category: "indoor", areas: ["safran"], months: [], interval: 60, notes: "Kontrola průchodnosti syfonů, výměna filtrů a sanace odpadního potrubí.", lastDone: null },
+      
+      // --- KOMUNITNÍ PROSTOR ---
+      { id: "v1_kom", name: "Komunitní pr.: Větrání & kontrola vlhkosti", role: "udrzbar", category: "indoor", areas: ["komunitni"], months: [3, 4, 5, 6, 7, 8, 9, 10], interval: 1, notes: "Pravidelné větrání, kontrola plísní v rohách a stavu podlah.", lastDone: null },
+      { id: "v2_kom", name: "Komunitní pr.: Údržba venkovního posezení & ohniště", role: "udrzbar", category: "outdoor", areas: ["komunitni"], months: [4, 5, 6, 7, 8, 9, 10], interval: 14, notes: "Čištění ohniště, kontrola laviček (dotažení šroubů, nátěr dřeva).", lastDone: null },
+
+      // --- ŠKOLNÍ PROSTOR (Jurta, Teepee, Hřiště) ---
+      { id: "v1_heat", name: "Školní pr.: Ranní zátop v jurtě a mobilheimu (<18°C)", role: "udrzbar", category: "indoor", areas: ["skolni"], months: [9, 10, 11, 12, 1, 2, 3, 4], interval: 1, notes: "Zatopit před příchodem dětí do 7:30.", lastDone: null },
+      { id: "v5", name: "Školní pr.: Zátěžová zkouška herních prvků a dopadových ploch", role: "udrzbar", category: "outdoor", areas: ["skolni"], months: [], interval: 7, notes: "Každé pondělí: zkouška vlastní vahou, doplňování kačírku/štěpky pod průlezkami.", lastDone: null },
+      { id: "v3_fruit", name: "Školní pr.: Sběr padaného ovoce u hřiště", role: "udrzbar", category: "outdoor", areas: ["skolni"], months: [8, 9], interval: 1, notes: "Prevence výskytu vos v blízkosti dětí.", lastDone: null },
+
+      // --- BYTY (Nájemní údržba & Technické revize) ---
+      { id: "b1", name: "Byty: Ododečty vodoměrů & měřičů tepla", role: "udrzbar", category: "indoor", areas: ["byty"], months: [], interval: 30, notes: "Kopis stavu spotřeby vody a tepla na konci měsíce pro rozúčtování.", lastDone: null },
+      { id: "b2", name: "Byty: Kontrola těsnosti ventilů, WC a baterií", role: "udrzbar", category: "indoor", areas: ["byty"], months: [], interval: 90, notes: "Preventivní prohlídka proti protékání záchodů a rohových ventilů pod dřezem.", lastDone: null },
+      { id: "b3", name: "Byty: Kontrola hlásičů kouře a CO čidel", role: "udrzbar", category: "indoor", areas: ["byty"], months: [], interval: 180, notes: "Test baterií v detektorech kouře a plynu v bytech.", lastDone: null },
+      { id: "b4", name: "Byty: Pročištění odvětrávání a stoupacích šachet", role: "udrzbar", category: "indoor", areas: ["byty"], months: [10], interval: 365, notes: "Kontrola mřížek ventilace a čištění odsávání v koupelnách.", lastDone: null },
+
+      // --- CHATA HRAŠTICE (Rekreační & Sezónní provoz) ---
+      { id: "h1", name: "Hraštice: Kontrola a prořez stromů u střešní krytiny", role: "udrzbar", category: "outdoor", areas: ["hrastice"], months: [3, 4, 10, 11], interval: 180, notes: "Odstranění větví zasahujících do střechy nebo drátů napětí.", lastDone: null },
+      { id: "h2", name: "Hraštice: Kontrola septiku / jímky & kontrolní šachty", role: "udrzbar", category: "outdoor", areas: ["hrastice"], months: [], interval: 30, notes: "Kontrola hladiny naplnění a funkčnosti čerpadla.", lastDone: null },
+      { id: "v9_hrastice", name: "Hraštice: Kompletní odvodnění & zazimování objektu", role: "udrzbar", category: "outdoor", areas: ["hrastice"], months: [10, 11], interval: 365, notes: "Vypustit rozvody vody, profouknout kompresorem, nemrznoucí směs do WC.", lastDone: null },
+
+      // --- VRCHLABÍ 172 (Horský objekt) ---
+      { id: "vr1", name: "Vrchlabí: Kontrola střechy, žlabů a sněhových zábran", role: "udrzbar", category: "outdoor", areas: ["vrchlabi"], months: [9, 10, 11], interval: 90, notes: "Čištění žlabů od listí před zimou a kontrola upevnění sněhových háků.", lastDone: null },
+      { id: "vr2", name: "Vrchlabí: Revize a kontrola kotle / topného systému", role: "udrzbar", category: "indoor", areas: ["vrchlabi"], months: [8, 9], interval: 365, notes: "Servisní prohlídka kotle, odvzdušnění radiátorů v celém objektu.", lastDone: null },
+      { id: "vr3", name: "Vrchlabí: Kontrola zásoby posypové soli a příprava nářadí na sníh", role: "udrzbar", category: "outdoor", areas: ["vrchlabi"], months: [10, 11], interval: 30, notes: "Příprava hráběl na sníh, frézy a dostatek posypového materiálu.", lastDone: null },
+
+      // --- SPOLČNÉ VENKOVNÍ PRÁCE (Více objektů) ---
+      { id: "v2", name: "Zalévání záhonů, květin a stromků (podvečer po 16:45)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [4, 5, 6, 7, 8, 9], interval: 2, notes: "Zalévat až po 16:45. Pokud pršelo, vynechat.", lastDone: null },
+      { id: "v3", name: "Sekání trávy (Srpnový střih 5-6 cm)", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [4, 5, 6, 7, 8, 9, 10], interval: 10, notes: "Konec srpna: výška 5-6 cm. Za deště ZÁKAZ sekání!", lastDone: null },
+      { id: "v4", name: "Štípání a rovnání dřeva pod střechu", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice", "vrchlabi"], months: [8, 9, 10], interval: 14, notes: "Chystat min. 1 měsíc předem, aby dřevo proschlo.", lastDone: null },
+      { id: "v6", name: "Čištění okapů a svodů", role: "udrzbar", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice", "vrchlabi"], months: [3, 4, 5, 9, 10, 11], interval: 30, notes: "Žebřík stavět v poměru 1:4. Jen za bezvětří!", lastDone: null }
     ];
 
     function todayStr() { return new Date().toISOString().slice(0, 10); }
@@ -72,7 +95,6 @@
       const [selectedAreaFilter, setSelectedAreaFilter] = useState("all");
       const [wageSettings, setWageSettings] = useState({ defaultRate: 300, areaRates: { safran: 300, komunitni: 300, skolni: 300, byty: 350, hrastice: 350, vrchlabi: 350 } });
 
-      // Načtení dat a živého počasí pro Praha-Troja
       useEffect(() => {
         setTasks(storageGet("tasks-catalog") || SEED_TASKS);
         setExtra(storageGet("extra-tasks") || []);
@@ -83,14 +105,13 @@
 
         const localWeather = storageGet("weather-state");
         
-        // Načtení reálných dat přes API
         fetch('https://api.open-meteo.com/v1/forecast?latitude=50.1162&longitude=14.4175&current_weather=true')
           .then(res => res.json())
           .then(data => {
             if (data.current_weather) {
               const newW = {
                 date: todayStr(),
-                isRaining: localWeather ? localWeather.isRaining : (data.current_weather.weathercode >= 51),
+                isRaining: localWeather !== null ? localWeather.isRaining : (data.current_weather.weathercode >= 51),
                 temp: data.current_weather.temperature,
                 wind: data.current_weather.windspeed
               };
@@ -106,13 +127,20 @@
       const today = todayStr();
       const month = new Date().getMonth() + 1;
 
-      // Filtr podle oblasti
+      // Ruční přepínač počasí - Funkční a okamžitá reakce!
+      function toggleRain() {
+        const next = { ...weather, date: today, isRaining: !weather.isRaining };
+        setWeather(next);
+        storageSet("weather-state", next);
+      }
+
+      // Filtr podle objektů
       const filteredTasks = useMemo(() => {
         if (selectedAreaFilter === "all") return tasks;
         return tasks.filter(t => t.areas && t.areas.includes(selectedAreaFilter));
       }, [tasks, selectedAreaFilter]);
 
-      // Vyhodnocení úkolů + Bezpečnostní pravidla (Vítr > 6m/s nebo Déšť)
+      // Vyhodnocení úkolů + Bezpečnostní pravidla
       const due = useMemo(() => filteredTasks.filter(t => isSeasonActive(t, month) && isDue(t, today)), [filteredTasks, month, today]);
       
       const isOutdoorBlocked = weather.isRaining || weather.wind > 6;
@@ -124,12 +152,6 @@
         const updated = tasks.map(t => t.id === id ? { ...t, lastDone: t.lastDone === today ? null : today } : t);
         setTasks(updated);
         storageSet("tasks-catalog", updated);
-      }
-
-      function toggleRain() {
-        const next = { ...weather, date: today, isRaining: !weather.isRaining };
-        setWeather(next);
-        storageSet("weather-state", next);
       }
 
       function addExtra(name) {
@@ -172,7 +194,7 @@
 
         if (copyToBacklog) {
           addTask({
-            name: "Závada z reportu: " + text.slice(0, 40) + "...",
+            name: "Závada: " + text.slice(0, 35) + "...",
             category: "indoor",
             interval: 1,
             notes: text,
@@ -208,26 +230,26 @@
       }
 
       return e("div", { className: "min-h-screen bg-[#1B1E21] text-[#ECECEA] p-4 sm:p-6 font-sans max-w-4xl mx-auto" },
-        // HLAVIČKA APLIKACE METEO
+        // HLAVIČKA APLIKACE METEO PODMÍNKY
         e("div", { className: "flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-[#3A3F44] pb-4" },
           e("div", null,
             e("h1", { className: "text-2xl font-bold uppercase tracking-wide text-[#F2A93B]" }, "Provozní deník údržby"),
             e("p", { className: "text-sm text-gray-400 capitalize" }, 
               new Intl.DateTimeFormat("cs-CZ", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()) + 
-              ` | Praha–Troja: ${weather.temp}°C, vítr ${weather.wind} m/s`
+              ` | Teplota: ${weather.temp}°C | Vítr: ${weather.wind} m/s`
             )
           ),
           e("button", {
             onClick: toggleRain,
-            className: `px-4 py-2 rounded-xl text-sm font-semibold border transition flex items-center gap-2 ${weather.isRaining ? "bg-red-900/40 border-red-500 text-red-300 animate-pulse" : "bg-[#2E3338] border-[#3A3F44] text-gray-200"}`
+            className: `px-4 py-2 rounded-xl text-sm font-bold border transition flex items-center gap-2 cursor-pointer shadow-md ${weather.isRaining ? "bg-red-900/60 border-red-500 text-red-200 animate-pulse" : "bg-[#2E3338] border-[#3A3F44] text-gray-200 hover:bg-[#3A3F44]"}`
           },
-            weather.isRaining ? "🌧️ Aktivní Deštivý Plán" : "☀️ Kdyby se počasí obrátiło"
+            weather.isRaining ? "🌧️ Dnes PRŠÍ (Klikni pro Sucho)" : "☀️ Dnes je SUCHO (Klikni pro Déšť)"
           )
         ),
 
-        // INFORMACE O TEPLOTĚ A VĚTRU
+        // INFORMACE O TEPLOTĚ
         weather.temp < 18 && e("div", { className: "mb-4 p-3 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-xs flex items-center gap-2" },
-          "🔥 ", e("strong", null, "Ranní chlad (<18°C):"), " Vytvořena priorita pro ranní zátop v jurtě a mobilheimu do 7:30!"
+          "🔥 ", e("strong", null, "Ranní chlad (<18°C):"), " Vytvořena priorita pro ranní zátop v jurtě a mobilheimu!"
         ),
 
         // FILTR PODLE OBJEKTŮ
@@ -252,10 +274,10 @@
         // NAVIGAČNÍ ZÁLOŽKY
         e("div", { className: "flex gap-2 mb-6 bg-[#24282C] p-1.5 rounded-2xl border border-[#3A3F44]" },
           [
-            { id: "dnes", label: "Dnes & Harmonogram" },
-            { id: "katalog", label: "Katalog & Sezónnost" },
+            { id: "dnes", label: "Dnes & Úkoly" },
+            { id: "katalog", label: "Katalog úkolů" },
             { id: "vykaz", label: "Výkaz práce" },
-            { id: "protokol", label: "Protokol & Backlog" }
+            { id: "protokol", label: "Protokol & Závady" }
           ].map(t => e("button", {
             key: t.id,
             onClick: () => setTab(t.id),
@@ -275,9 +297,9 @@
     function DnesTab({ dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra, today, isOutdoorBlocked }) {
       const [text, setText] = useState("");
       return e("div", { className: "space-y-6" },
-        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/30 border border-red-500/50 text-red-300" },
-          e("p", { className: "font-bold text-sm mb-1" }, `⚠️ Odloženo kvůli dešti nebo větru >6m/s (${outdoorBlocked.length})`),
-          e("p", { className: "text-xs mb-2 text-red-400" }, "Pravidlo: Práce ve výškách (okapy, žebřík 1:4) a venkovní sekání/nátěry se přesouvají na deštivý plán (Dílna / Elektro pod střechou)."),
+        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/40 border border-red-500/60 text-red-200" },
+          e("p", { className: "font-bold text-sm mb-1 flex items-center gap-2" }, `🛑 Odloženo kvůli počasí / větru (${outdoorBlocked.length})`),
+          e("p", { className: "text-xs mb-2 text-red-300 opacity-90" }, "Venkovní práce a práce na střeše/žebříku jsou pozastaveny. Využijte čas na údržbu v dílně nebo revize vnitřků!"),
           outdoorBlocked.map(t => e("p", { key: t.id, className: "text-xs font-semibold opacity-90" }, `• ${t.name}`))
         ),
 
@@ -289,7 +311,7 @@
 
         e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `Venkovní úkoly (${dueOutdoor.length})`),
-          dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, isOutdoorBlocked ? "Venkovní úkoly jsou dnes blokovány deštěm/větrem." : "Žádné venkovní úkoly k provedení.") :
+          dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, isOutdoorBlocked ? "Venkovní úkoly jsou v současnosti blokovány deštěm." : "Žádné venkovní úkoly k provedení.") :
           dueOutdoor.map(t => e(TaskCard, { key: t.id, task: t, onToggle: onToggleTask, today }))
         ),
 
@@ -329,7 +351,7 @@
             task.notes && e("p", { className: "text-xs text-gray-400 mt-0.5" }, task.notes)
           )
         ),
-        e("div", { className: "flex gap-1" },
+        e("div", { className: "flex gap-1 flex-wrap justify-end" },
           (task.areas || []).map(aId => {
             const area = AREAS.find(a => a.id === aId);
             return area ? e("span", { key: aId, className: "text-[10px] px-2 py-0.5 rounded-full font-bold", style: { backgroundColor: area.color + "22", color: area.color, border: `1px solid ${area.color}55` } }, area.label) : null;
@@ -338,7 +360,7 @@
       );
     }
 
-    // ---------- ZÁLOŽKA KATALOG & SEZÓNNOST ----------
+    // ---------- ZÁLOŽKA KATALOG ----------
     function KatalogTab({ tasks, onAddTask, onDeleteTask }) {
       const [name, setName] = useState("");
       const [cat, setCat] = useState("indoor");
@@ -346,18 +368,15 @@
       const [notes, setNotes] = useState("");
       const [selectedAreas, setSelectedAreas] = useState(["safran"]);
 
-      return e("div", { className: "space-y-6" },
-        // KARTA SEZÓNNÍCH PRAVIDEL
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
-          e("h3", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-2" }, "📌 Mikro-Pravidla Facility Managementu"),
-          e("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-300" },
-            e("div", { className: "p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44]" }, e("strong", { className: "text-amber-400" }, "Konec srpna / Tráva:"), " Sekat výhradně na 5-6 cm. Při dešti sekání zakázáno!"),
-            e("div", { className: "p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44]" }, e("strong", { className: "text-amber-400" }, "Palivové dřevo:"), " Štípat s předstihem min. 1 měsíc před zátopem."),
-            e("div", { className: "p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44]" }, e("strong", { className: "text-amber-400" }, "Žebřík & Okapy:"), " Sklon 1:4. Opírat nad okap, nikdy o okap. Pouze za bezvětří!"),
-            e("div", { className: "p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44]" }, e("strong", { className: "text-amber-400" }, "Revize Elektro:"), " Před 1.9. kontrola mobilheimu a kuchyňky. Venku krytí IP44.")
-          )
-        ),
+      function toggleAreaSelection(id) {
+        if (selectedAreas.includes(id)) {
+          setSelectedAreas(selectedAreas.filter(a => a !== id));
+        } else {
+          setSelectedAreas([...selectedAreas, id]);
+        }
+      }
 
+      return e("div", { className: "space-y-6" },
         e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
           e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3 uppercase tracking-wider" }, "Přidat nový úkol do katalogu"),
           e("div", { className: "space-y-3" },
@@ -368,6 +387,17 @@
                 e("option", { value: "outdoor" }, "Venkovní úkol")
               ),
               e("input", { type: "number", value: interval, onChange: e => setInterval(Number(e.target.value)), placeholder: "Interval (dní)", className: "w-32 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" })
+            ),
+            e("div", null,
+              e("p", { className: "text-xs font-bold text-gray-400 mb-1.5" }, "Přiřadit k objektům:"),
+              e("div", { className: "flex gap-1.5 flex-wrap" },
+                AREAS.map(a => e("button", {
+                  key: a.id,
+                  type: "button",
+                  onClick: () => toggleAreaSelection(a.id),
+                  className: `px-2.5 py-1 rounded-lg text-xs font-bold border transition ${selectedAreas.includes(a.id) ? "bg-[#F2A93B] text-black border-[#F2A93B]" : "bg-[#2E3338] text-gray-400 border-[#3A3F44]"}`
+                }, a.label))
+              )
             ),
             e("input", { value: notes, onChange: e => setNotes(e.target.value), placeholder: "Poznámka / Instrukce", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
             e("button", {
@@ -387,7 +417,7 @@
           tasks.map(t => e("div", { key: t.id, className: "flex justify-between items-start p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
             e("div", null,
               e("p", { className: "text-sm font-semibold text-gray-100" }, t.name),
-              e("p", { className: "text-xs text-gray-400 mt-0.5" }, `Opakování: co ${t.interval} dní | Kateg.: ${t.category === "indoor" ? "Vnitřní/Krytý" : "Venkovní"}`),
+              e("p", { className: "text-xs text-gray-400 mt-0.5" }, `Opakování: co ${t.interval} dní | Kateg.: ${t.category === "indoor" ? "Vnitřní" : "Venkovní"}`),
               t.notes && e("p", { className: "text-xs text-amber-300/80 italic mt-1" }, t.notes)
             ),
             e("button", { onClick: () => onDeleteTask(t.id), className: "text-gray-500 hover:text-red-400 text-xs px-2 py-1" }, "Smazat")
@@ -396,23 +426,23 @@
       );
     }
 
-    // ---------- ZÁLOŽKA PROTOKOL A BACKLOG ----------
+    // ---------- ZÁLOŽKA PROTOKOL & BACKLOG ----------
     function ProtokolTab({ log, onAddLog }) {
       const [text, setText] = useState("");
       return e("div", { className: "space-y-6" },
         e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-2" }, "Večerní hlášení / Záznam závad (17:45 - 18:00)"),
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-2" }, "Večerní hlášení / Záznam závad"),
           e("textarea", {
             value: text,
             onChange: e => setText(e.target.value),
-            placeholder: "Zapište odchylky od plánu, docházející materiál nebo zjištěné závady...",
+            placeholder: "Zapište odchylky od plánu, docházející materiál nebo nově zjištěné závady v objektu...",
             className: "w-full p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none h-28 mb-3"
           }),
           e("div", { className: "flex gap-2" },
             e("button", {
               onClick: () => { onAddLog(text, false); setText(""); },
               className: "flex-1 py-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-gray-200 font-bold text-xs"
-            }, "Uložit jako běžný zápis"),
+            }, "Uložit běžný zápis"),
             e("button", {
               onClick: () => { onAddLog(text, true); setText(""); },
               className: "flex-1 py-2.5 rounded-xl bg-[#F2A93B] text-black font-bold text-xs"
@@ -421,8 +451,8 @@
         ),
 
         e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Historie zápisů a reportů"),
-          log.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Zatím nebyly provedeny žádné záznamy.") :
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Historie hlášení"),
+          log.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Zatím nebyl zapsán žádný denní protokol.") :
           log.map(l => e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
             e("div", { className: "flex justify-between text-xs text-gray-400 mb-1" },
               e("span", { className: "font-bold text-[#F2A93B]" }, l.author || "Údržbář Vláďa"),
