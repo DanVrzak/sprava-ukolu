@@ -1,5 +1,3 @@
-import React, { useState, useEffect, useMemo } from "react";
-import {
   CloudRain, Sun, CheckCircle2, Circle, Plus, Trash2, Sunrise, Sunset,
   Wrench, ClipboardList, CalendarDays, X, RotateCcw, BarChart3,
   ChevronLeft, ChevronRight, Clock, PlayCircle, StopCircle, Wallet, Settings2,
