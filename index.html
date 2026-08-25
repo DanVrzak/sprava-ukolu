@@ -1,414 +1,397 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="cs">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provozní deník údržby</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 </head>
-<body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="cs"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;Provozní deník údržby&lt;/title&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- Tailwind CSS --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- React &amp; ReactDOM --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body class="bg-[#1B1E21] text-[#ECECEA] antialiased"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="root"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const { useState, useEffect, useMemo, createElement: e } = React;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// ---------- Styl &amp; Konfigurace ----------</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const C = {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>bg: "#1B1E21", panel: "#24282C", panelAlt: "#2E3338", border: "#3A3F44",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>amber: "#F2A93B", green: "#5FB77E", red: "#E2694B", text: "#ECECEA", muted: "#9AA0A6"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const AREAS = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "safran", label: "Šafrán", color: "#8B5FBF" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "komunitni", label: "Komunitní prostor", color: "#3B5BA5" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "skolni", label: "Školní prostor", color: "#2E8B7D" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "byty", label: "Byty", color: "#6B6B6B" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "hrastice", label: "Chata Hraštice", color: "#C24B4B" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "vrchlabi", label: "Vrchlabí 172", color: "#9A8B3F" }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const ROLES = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "spravce", label: "Správce", color: "#6FA8DC" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "udrzbar", label: "Údržbář / zahradník", color: "#5FB77E" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "mistr", label: "Mistr", color: "#F2A93B" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "tvurce", label: "Tvůrce / řemeslník", color: "#B388EB" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "manzel", label: "Hodinový manžel", color: "#E07A5F" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "pohotovost", label: "Pohotovost", color: "#C24B4B" }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const SEED_SCHEDULE = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "r1", label: "Ranní kontrolní kolečko", role: "spravce", days: [1,2,3,4,5,6,7], months: [], timeStart: "06:00", timeEnd: "06:30", areas: ["safran", "komunitni", "skolni"], note: "Odemčení/uzamčení, rychlá kontrola objektů." },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "r2", label: "Sezónní údržba zahrady a exteriéru", role: "udrzbar", days: [2,4,6], months: [3,4,5,9,10,11], timeStart: "08:00", timeEnd: "12:00", areas: ["safran", "komunitni", "skolni"], note: "Jaro/podzim: sekání, hrabání, úklid." },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "r3", label: "Letní údržba a zálivka", role: "udrzbar", days: [1,3,5], months: [6,7,8], timeStart: "07:00", timeEnd: "10:00", areas: ["safran", "komunitni", "skolni"], note: "Zálivka záhonů, sekání trávy, drobné opravy." },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "r4", label: "Zimní provoz a topení", role: "udrzbar", days: [1,2,3,4,5,6,7], months: [12,1,2], timeStart: "06:30", timeEnd: "08:00", areas: ["safran", "komunitni", "skolni"], note: "Zátop, kontrola topení, sníh a posyp." }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const SEED_TASKS = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v1", name: "Větrání teepee / jurty", category: "indoor", areas: ["komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 1, notes: "Konkrétně: KOM prostor; Školní prostor, Jurta", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v2", name: "Zalévání záhonů, květin, stromků, keřů", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 3, notes: "Šafrán exteriér, KOM, Školní prostor", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v3", name: "Sekání trávy", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5, 9, 10, 11], interval: 14, notes: "Šafrán, KOM, Školní prostor", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v4", name: "Odzimování, úklid po zimě (hrabání, hnojení)", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Jarní úklid pozemku", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v5", name: "Kontrola stavu po zimě + soupis potřebných oprav", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Výstup jde do backlogu oprav", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v6", name: "Otevření a kontrola venkovní vody, napojení hadic", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Předletní příprava vody", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v7", name: "Kontrola nářadí a vybavení", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Revize funkčnosti strojů a nářadí", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v8", name: "Kontrola hřiště a herních prvků po zimě", category: "outdoor", areas: ["safran", "skolni"], months: [3, 4, 5], interval: 90, notes: "Bezpečnostní kontrola prvků", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v9", name: "Kontrola a čištění okapů", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [], interval: 90, notes: "Domek, Nová chata, Altán, Maringotka, Jurta", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v10", name: "Sazba trávy a doplňování osiva", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5], interval: 14, notes: "Úprava lysin v trávníku", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v11", name: "Kontrola funkčnosti osvětlení v areálu", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 30, notes: "Výměna prasklých žárovek", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v12", name: "Prořezávání stromů a keřů", category: "outdoor", areas: ["safran", "komunitni", "hrastice"], months: [3, 4, 10, 11], interval: 182, notes: "Sezónní řez", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v13", name: "Kontrola topného systému a stavu paliva", category: "indoor", areas: ["safran", "komunitni", "skolni", "byty"], months: [9, 10, 11, 12, 1, 2], interval: 7, notes: "Dřevo, pelety, kontrola kotle", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v14", name: "Zazimování venkovní vody a vypuštění trubek", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [10, 11], interval: 365, notes: "Ochrana před mrazem", lastDone: null },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>{ id: "v15", name: "Pravidelný generální úklid dílny", category: "indoor", areas: ["safran"], months: [], interval: 30, notes: "Třídění materiálu, úklid stolů", lastDone: null }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// ---------- Pomocné funkce ----------</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function todayStr() { return new Date().toISOString().slice(0, 10); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function daysBetween(a, b) { return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function isSeasonActive(t, m) { return !t.months || t.months.length === 0 || t.months.includes(m); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function isDue(t, today) { return !t.lastDone || daysBetween(t.lastDone, today) &gt;= t.interval; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function storageGet(k) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : null; } catch(e) { return null; } }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function storageSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// ---------- Hlavní Aplikace ----------</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function App() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [tab, setTab] = useState("dnes");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [tasks, setTasks] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [weather, setWeather] = useState({ date: todayStr(), isRaining: false });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [extra, setExtra] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [log, setLog] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [sessions, setSessions] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [wageSettings, setWageSettings] = useState({ defaultRate: 300, areaRates: {} });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setTasks(storageGet("tasks-catalog") || SEED_TASKS);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setWeather(storageGet("weather-state") || { date: todayStr(), isRaining: false });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setExtra(storageGet("extra-tasks") || []);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setLog(storageGet("handover-log") || []);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setSessions(storageGet("work-sessions") || []);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setWageSettings(storageGet("wage-settings") || { defaultRate: 300, areaRates: {} });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}, []);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const today = todayStr();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const month = new Date().getMonth() + 1;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const due = useMemo(() =&gt; tasks.filter(t =&gt; isSeasonActive(t, month) &amp;&amp; isDue(t, today)), [tasks, month, today]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const dueIndoor = due.filter(t =&gt; t.category === "indoor");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const dueOutdoor = weather.isRaining ? [] : due.filter(t =&gt; t.category === "outdoor");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const outdoorBlocked = weather.isRaining ? due.filter(t =&gt; t.category === "outdoor") : [];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function toggleTask(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = tasks.map(t =&gt; t.id === id ? { ...t, lastDone: t.lastDone === today ? null : today } : t);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setTasks(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("tasks-catalog", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function toggleRain() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const next = { date: today, isRaining: !weather.isRaining };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setWeather(next);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("weather-state", next);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function addExtra(name) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (!name.trim()) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = [...extra, { id: "e-" + Date.now(), name, done: false }];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setExtra(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("extra-tasks", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function toggleExtra(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = extra.map(e =&gt; e.id === id ? { ...e, done: !e.done } : e);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setExtra(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("extra-tasks", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function deleteExtra(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = extra.filter(e =&gt; e.id !== id);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setExtra(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("extra-tasks", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function addTask(newTask) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = [...tasks, { ...newTask, id: "t-" + Date.now(), lastDone: null }];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setTasks(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("tasks-catalog", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function deleteTask(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = tasks.filter(t =&gt; t.id !== id);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setTasks(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("tasks-catalog", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function addLogEntry(text) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (!text.trim()) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const entry = { id: "l-" + Date.now(), date: today, time: new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }), text };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = [entry, ...log];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setLog(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("handover-log", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function startShift(area) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (sessions.some(s =&gt; !s.end)) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = [{ id: "s-" + Date.now(), date: today, start: new Date().toISOString(), end: null, area: area || "safran" }, ...sessions];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setSessions(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("work-sessions", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function endShift() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const idx = sessions.findIndex(s =&gt; !s.end);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (idx &lt; 0) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const now = new Date().toISOString();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const s = sessions[idx];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const hours = Math.round(((new Date(now) - new Date(s.start)) / 3600000) * 100) / 100;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const rate = wageSettings.areaRates[s.area] || wageSettings.defaultRate;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = sessions.map((x, i) =&gt; i === idx ? { ...x, end: now, hours, rate, wage: Math.round(hours * rate) } : x);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setSessions(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("work-sessions", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>function deleteSession(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const updated = sessions.filter(s =&gt; s.id !== id);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setSessions(updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>storageSet("work-sessions", updated);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return e("div", { className: "max-w-2xl mx-auto p-4 sm:p-6" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Hlavička</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "flex justify-between items-center mb-6 flex-wrap gap-2" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("h1", { className: "text-2xl font-bold uppercase text-[#F2A93B]" }, "Provozní deník údržby"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-sm text-gray-400 capitalize" }, new Intl.DateTimeFormat("cs-CZ", { weekday: "long", day: "numeric", month: "long" }).format(new Date()))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("button", { onClick: toggleRain, className: `px-4 py-2 rounded-xl text-sm font-semibold border flex items-center gap-2 ${weather.isRaining ? "bg-red-900/30 border-red-500 text-red-400" : "bg-[#2E3338] border-[#3A3F44] text-gray-200"}` },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>weather.isRaining ? "🌧️ Dnes prší" : "☀️ Dnes je sucho"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Záložky navigační menu</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "flex gap-2 mb-6 border-b border-[#3A3F44] pb-3 overflow-x-auto" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>[</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: "dnes", label: "Dnes" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: "katalog", label: "Katalog" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: "vykaz", label: "Výkaz práce" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: "protokol", label: "Protokol" }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>].map(t =&gt; e("button", {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>key: t.id,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>onClick: () =&gt; setTab(t.id),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>className: `px-4 py-2 rounded-xl text-sm font-semibold transition ${tab === t.id ? "bg-[#F2A93B] text-black" : "text-gray-400 hover:bg-[#2E3338]"}`</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>}, t.label))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// OBSAH ZÁLOŽEK</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>tab === "dnes" &amp;&amp; e(DnesView, { dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask: toggleTask, onAddExtra: addExtra, onToggleExtra: toggleExtra, onDeleteExtra: deleteExtra, today }),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>tab === "katalog" &amp;&amp; e(KatalogView, { tasks, onAddTask: addTask, onDeleteTask: deleteTask }),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>tab === "protokol" &amp;&amp; e(ProtokolView, { log, onAddLog: addLogEntry }),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>tab === "vykaz" &amp;&amp; e(VykazView, { sessions, onStart: startShift, onEnd: endShift, onDelete: deleteSession, wageSettings, setWageSettings })</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// ---------- Komponenty Záložek ----------</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function DnesView({ dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra, today }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [text, setText] = useState("");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return e("div", { className: "space-y-6" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>outdoorBlocked.length &gt; 0 &amp;&amp; e("div", { className: "p-4 rounded-xl bg-red-900/20 border border-red-500/40 text-red-400 text-sm" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("p", { className: "font-semibold mb-1" }, `Odloženo kvůli dešti (${outdoorBlocked.length})`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>outdoorBlocked.map(t =&gt; e("p", { key: t.id, className: "text-xs opacity-80" }, `• ${t.name}`))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Vnitřní úkoly (${dueIndoor.length})`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>dueIndoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Žádné plánované vnitřní úkoly na dnes.") :</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>dueIndoor.map(t =&gt; e("div", { key: t.id, onClick: () =&gt; onToggleTask(t.id), className: "flex items-start gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("span", { className: "text-lg" }, t.lastDone === today ? "✅" : "⚪"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("div", { className: "flex-1" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("p", { className: `text-sm font-medium ${t.lastDone === today ? "line-through text-gray-500" : ""}` }, t.name),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>t.notes &amp;&amp; e("p", { className: "text-xs text-gray-400 mt-0.5" }, t.notes)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Venkovní úkoly (${dueOutdoor.length})`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Žádné venkovní úkoly k provedení.") :</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>dueOutdoor.map(t =&gt; e("div", { key: t.id, onClick: () =&gt; onToggleTask(t.id), className: "flex items-start gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("span", { className: "text-lg" }, t.lastDone === today ? "✅" : "⚪"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("div", { className: "flex-1" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("p", { className: `text-sm font-medium ${t.lastDone === today ? "line-through text-gray-500" : ""}` }, t.name),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>t.notes &amp;&amp; e("p", { className: "text-xs text-gray-400 mt-0.5" }, t.notes)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Mimořádné úkoly"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>extra.map(ex =&gt; e("div", { key: ex.id, className: "flex items-center gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", { onClick: () =&gt; onToggleExtra(ex.id) }, ex.done ? "✅" : "⚪"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("span", { className: `flex-1 text-sm ${ex.done ? "line-through text-gray-500" : ""}` }, ex.name),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", { onClick: () =&gt; onDeleteExtra(ex.id), className: "text-gray-500 hover:text-red-400 text-xs px-2 py-1" }, "Smazat")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>)),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("div", { className: "flex gap-2 mt-3" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("input", {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>value: text,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>onChange: e =&gt; setText(e.target.value),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>onKeyDown: e =&gt; { if (e.key === "Enter") { onAddExtra(text); setText(""); } },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>placeholder: "Přidat rychlý úkol…",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", { onClick: () =&gt; { onAddExtra(text); setText(""); }, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm" }, "Přidat")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function KatalogView({ tasks, onAddTask, onDeleteTask }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [name, setName] = useState("");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [cat, setCat] = useState("indoor");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [interval, setInterval] = useState(7);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [notes, setNotes] = useState("");</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return e("div", { className: "space-y-6" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "p-4 rounded-xl bg-[#24282C] border border-[#3A3F44]" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3" }, "Přidat nový úkol do katalogu"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("div", { className: "space-y-3" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("input", { value: name, onChange: e =&gt; setName(e.target.value), placeholder: "Název úkolu", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" }),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("div", { className: "flex gap-2" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("select", { value: cat, onChange: e =&gt; setCat(e.target.value), className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e("option", { value: "indoor" }, "Vnitřní"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e("option", { value: "outdoor" }, "Venkovní")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("input", { type: "number", value: interval, onChange: e =&gt; setInterval(Number(e.target.value)), placeholder: "Interval (dní)", className: "w-1/3 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" })</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("input", { value: notes, onChange: e =&gt; setNotes(e.target.value), placeholder: "Poznámka / Upřesnění", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" }),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>onClick: () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (name.trim()) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                  </span>onAddTask({ name, category: cat, interval, notes, months: [], areas: [] });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                  </span>setName(""); setNotes("");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>className: "w-full py-2.5 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, "Uložit úkol")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Všechny úkoly (${tasks.length})`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>tasks.map(t =&gt; e("div", { key: t.id, className: "flex justify-between items-start p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("p", { className: "text-sm font-medium" }, t.name),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("p", { className: "text-xs text-gray-400" }, `Opakování: co ${t.interval} dní | ${t.category === "indoor" ? "Vnitřní" : "Venkovní"}`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>t.notes &amp;&amp; e("p", { className: "text-xs text-gray-500 mt-0.5" }, t.notes)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", { onClick: () =&gt; onDeleteTask(t.id), className: "text-gray-500 hover:text-red-400 text-xs p-1" }, "Smazat")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function ProtokolView({ log, onAddLog }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [text, setText] = useState("");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return e("div", { className: "space-y-4" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "flex gap-2" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("textarea", {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>value: text,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>onChange: e =&gt; setText(e.target.value),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>placeholder: "Zapsat poznámku z dnešní směny / stav objektu…",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>className: "flex-1 p-3 rounded-xl bg-[#24282C] border border-[#3A3F44] text-sm outline-none h-24"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>})</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("button", {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>onClick: () =&gt; { onAddLog(text); setText(""); },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm w-full"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}, "Uložit zápis do deníku"),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "pt-4" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Historie záznamů"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>log.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Zatím žádné zápisy.") :</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>log.map(l =&gt; e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("div", { className: "flex justify-between text-xs text-gray-400 mb-1" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("span", { className: "font-bold text-[#F2A93B]" }, "Údržbář"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("span", null, `${l.date} v ${l.time}`)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-sm text-gray-200 whitespace-pre-line" }, l.text)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function VykazView({ sessions, onStart, onEnd, onDelete, wageSettings, setWageSettings }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [selectedArea, setSelectedArea] = useState("safran");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const active = sessions.find(s =&gt; !s.end);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const totalWage = sessions.reduce((acc, s) =&gt; acc + (s.wage || 0), 0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const totalHours = Math.round(sessions.reduce((acc, s) =&gt; acc + (s.hours || 0), 0) * 100) / 100;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return e("div", { className: "space-y-6" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Ovládání směny</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "p-4 rounded-xl bg-[#24282C] border border-[#3A3F44] text-center" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>active ? e("div", { className: "space-y-3" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-sm text-green-400 font-semibold" }, `⏱️ Probíhá směna od ${new Date(active.start).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })}`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", { onClick: onEnd, className: "w-full py-3 rounded-xl bg-red-500 text-white font-bold text-sm" }, "Ukončit směnu")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>) : e("div", { className: "space-y-3" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("select", { value: selectedArea, onChange: e =&gt; setSelectedArea(e.target.value), className: "w-full p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none mb-2" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>AREAS.map(a =&gt; e("option", { key: a.id, value: a.id }, a.label))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("button", { onClick: () =&gt; onStart(selectedArea), className: "w-full py-3 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, "Začít novou směnu")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Celkový přehled</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", { className: "grid grid-cols-2 gap-3" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("div", { className: "p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-center" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-xs text-gray-400" }, "Odpracováno celkem"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-lg font-bold text-[#F2A93B]" }, `${totalHours} hod`)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("div", { className: "p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-center" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-xs text-gray-400" }, "Celková odměna"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("p", { className: "text-lg font-bold text-green-400" }, `${totalWage} Kč`)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>),</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Výpis směn</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Výkaz odpracovaných směn"),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>sessions.map(s =&gt; e("div", { key: s.id, className: "flex justify-between items-center p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e("div", null,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("p", { className: "text-sm font-semibold" }, `${s.date} ${s.end ? "" : "(probíhá)"}`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>e("p", { className: "text-xs text-gray-400" }, `Objekt: ${(AREAS.find(a=&gt;a.id===s.area)||{}).label || s.area}`),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>s.hours &amp;&amp; e("p", { className: "text-xs text-green-400" }, `${s.hours} h × ${s.rate} Kč = ${s.wage} Kč`)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>s.end &amp;&amp; e("button", { onClick: () =&gt; onDelete(s.id), className: "text-gray-500 hover:text-red-400 text-xs px-2" }, "Smazat")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>))</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Inicializace Reactu</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const root = ReactDOM.createRoot(document.getElementById("root"));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>root.render(React.createElement(App));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<body class="bg-[#1B1E21] text-[#ECECEA] antialiased">
+  <div id="root"></div>
+
+  <script>
+    const { useState, useEffect, useMemo, createElement: e } = React;
+
+    // ---------- Styl & Konfigurace ----------
+    const C = {
+      bg: "#1B1E21", panel: "#24282C", panelAlt: "#2E3338", border: "#3A3F44",
+      amber: "#F2A93B", green: "#5FB77E", red: "#E2694B", text: "#ECECEA", muted: "#9AA0A6"
+    };
+
+    const AREAS = [
+      { id: "safran", label: "Šafrán", color: "#8B5FBF" },
+      { id: "komunitni", label: "Komunitní prostor", color: "#3B5BA5" },
+      { id: "skolni", label: "Školní prostor", color: "#2E8B7D" },
+      { id: "byty", label: "Byty", color: "#6B6B6B" },
+      { id: "hrastice", label: "Chata Hraštice", color: "#C24B4B" },
+      { id: "vrchlabi", label: "Vrchlabí 172", color: "#9A8B3F" }
+    ];
+
+    const ROLES = [
+      { id: "spravce", label: "Správce", color: "#6FA8DC" },
+      { id: "udrzbar", label: "Údržbář / zahradník", color: "#5FB77E" },
+      { id: "mistr", label: "Mistr", color: "#F2A93B" },
+      { id: "tvurce", label: "Tvůrce / řemeslník", color: "#B388EB" },
+      { id: "manzel", label: "Hodinový manžel", color: "#E07A5F" },
+      { id: "pohotovost", label: "Pohotovost", color: "#C24B4B" }
+    ];
+
+    const SEED_SCHEDULE = [
+      { id: "r1", label: "Ranní kontrolní kolečko", role: "spravce", days: [1,2,3,4,5,6,7], months: [], timeStart: "06:00", timeEnd: "06:30", areas: ["safran", "komunitni", "skolni"], note: "Odemčení/uzamčení, rychlá kontrola objektů." },
+      { id: "r2", label: "Sezónní údržba zahrady a exteriéru", role: "udrzbar", days: [2,4,6], months: [3,4,5,9,10,11], timeStart: "08:00", timeEnd: "12:00", areas: ["safran", "komunitni", "skolni"], note: "Jaro/podzim: sekání, hrabání, úklid." },
+      { id: "r3", label: "Letní údržba a zálivka", role: "udrzbar", days: [1,3,5], months: [6,7,8], timeStart: "07:00", timeEnd: "10:00", areas: ["safran", "komunitni", "skolni"], note: "Zálivka záhonů, sekání trávy, drobné opravy." },
+      { id: "r4", label: "Zimní provoz a topení", role: "udrzbar", days: [1,2,3,4,5,6,7], months: [12,1,2], timeStart: "06:30", timeEnd: "08:00", areas: ["safran", "komunitni", "skolni"], note: "Zátop, kontrola topení, sníh a posyp." }
+    ];
+
+    const SEED_TASKS = [
+      { id: "v1", name: "Větrání teepee / jurty", category: "indoor", areas: ["komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 1, notes: "Konkrétně: KOM prostor; Školní prostor, Jurta", lastDone: null },
+      { id: "v2", name: "Zalévání záhonů, květin, stromků, keřů", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5, 6, 7, 8], interval: 3, notes: "Šafrán exteriér, KOM, Školní prostor", lastDone: null },
+      { id: "v3", name: "Sekání trávy", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5, 9, 10, 11], interval: 14, notes: "Šafrán, KOM, Školní prostor", lastDone: null },
+      { id: "v4", name: "Odzimování, úklid po zimě (hrabání, hnojení)", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Jarní úklid pozemku", lastDone: null },
+      { id: "v5", name: "Kontrola stavu po zimě + soupis potřebných oprav", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Výstup jde do backlogu oprav", lastDone: null },
+      { id: "v6", name: "Otevření a kontrola venkovní vody, napojení hadic", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Předletní příprava vody", lastDone: null },
+      { id: "v7", name: "Kontrola nářadí a vybavení", category: "indoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [3, 4, 5], interval: 90, notes: "Revize funkčnosti strojů a nářadí", lastDone: null },
+      { id: "v8", name: "Kontrola hřiště a herních prvků po zimě", category: "outdoor", areas: ["safran", "skolni"], months: [3, 4, 5], interval: 90, notes: "Bezpečnostní kontrola prvků", lastDone: null },
+      { id: "v9", name: "Kontrola a čištění okapů", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [], interval: 90, notes: "Domek, Nová chata, Altán, Maringotka, Jurta", lastDone: null },
+      { id: "v10", name: "Sazba trávy a doplňování osiva", category: "outdoor", areas: ["safran", "komunitni", "skolni"], months: [3, 4, 5], interval: 14, notes: "Úprava lysin v trávníku", lastDone: null },
+      { id: "v11", name: "Kontrola funkčnosti osvětlení v areálu", category: "indoor", areas: ["safran", "komunitni", "skolni"], months: [], interval: 30, notes: "Výměna prasklých žárovek", lastDone: null },
+      { id: "v12", name: "Prořezávání stromů a keřů", category: "outdoor", areas: ["safran", "komunitni", "hrastice"], months: [3, 4, 10, 11], interval: 182, notes: "Sezónní řez", lastDone: null },
+      { id: "v13", name: "Kontrola topného systému a stavu paliva", category: "indoor", areas: ["safran", "komunitni", "skolni", "byty"], months: [9, 10, 11, 12, 1, 2], interval: 7, notes: "Dřevo, pelety, kontrola kotle", lastDone: null },
+      { id: "v14", name: "Zazimování venkovní vody a vypuštění trubek", category: "outdoor", areas: ["safran", "komunitni", "skolni", "hrastice"], months: [10, 11], interval: 365, notes: "Ochrana před mrazem", lastDone: null },
+      { id: "v15", name: "Pravidelný generální úklid dílny", category: "indoor", areas: ["safran"], months: [], interval: 30, notes: "Třídění materiálu, úklid stolů", lastDone: null }
+    ];
+
+    // ---------- Pomocné funkce ----------
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function daysBetween(a, b) { return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000); }
+    function isSeasonActive(t, m) { return !t.months || t.months.length === 0 || t.months.includes(m); }
+    function isDue(t, today) { return !t.lastDone || daysBetween(t.lastDone, today) >= t.interval; }
+    
+    function storageGet(k) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+    function storageSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+
+    // ---------- Hlavní Aplikace ----------
+    function App() {
+      const [tab, setTab] = useState("dnes");
+      const [tasks, setTasks] = useState([]);
+      const [weather, setWeather] = useState({ date: todayStr(), isRaining: false });
+      const [extra, setExtra] = useState([]);
+      const [log, setLog] = useState([]);
+      const [sessions, setSessions] = useState([]);
+      const [wageSettings, setWageSettings] = useState({ defaultRate: 300, areaRates: {} });
+
+      useEffect(() => {
+        setTasks(storageGet("tasks-catalog") || SEED_TASKS);
+        setWeather(storageGet("weather-state") || { date: todayStr(), isRaining: false });
+        setExtra(storageGet("extra-tasks") || []);
+        setLog(storageGet("handover-log") || []);
+        setSessions(storageGet("work-sessions") || []);
+        setWageSettings(storageGet("wage-settings") || { defaultRate: 300, areaRates: {} });
+      }, []);
+
+      const today = todayStr();
+      const month = new Date().getMonth() + 1;
+
+      const due = useMemo(() => tasks.filter(t => isSeasonActive(t, month) && isDue(t, today)), [tasks, month, today]);
+      const dueIndoor = due.filter(t => t.category === "indoor");
+      const dueOutdoor = weather.isRaining ? [] : due.filter(t => t.category === "outdoor");
+      const outdoorBlocked = weather.isRaining ? due.filter(t => t.category === "outdoor") : [];
+
+      function toggleTask(id) {
+        const updated = tasks.map(t => t.id === id ? { ...t, lastDone: t.lastDone === today ? null : today } : t);
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function toggleRain() {
+        const next = { date: today, isRaining: !weather.isRaining };
+        setWeather(next);
+        storageSet("weather-state", next);
+      }
+
+      function addExtra(name) {
+        if (!name.trim()) return;
+        const updated = [...extra, { id: "e-" + Date.now(), name, done: false }];
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      function toggleExtra(id) {
+        const updated = extra.map(e => e.id === id ? { ...e, done: !e.done } : e);
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      function deleteExtra(id) {
+        const updated = extra.filter(e => e.id !== id);
+        setExtra(updated);
+        storageSet("extra-tasks", updated);
+      }
+
+      function addTask(newTask) {
+        const updated = [...tasks, { ...newTask, id: "t-" + Date.now(), lastDone: null }];
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function deleteTask(id) {
+        const updated = tasks.filter(t => t.id !== id);
+        setTasks(updated);
+        storageSet("tasks-catalog", updated);
+      }
+
+      function addLogEntry(text) {
+        if (!text.trim()) return;
+        const entry = { id: "l-" + Date.now(), date: today, time: new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }), text };
+        const updated = [entry, ...log];
+        setLog(updated);
+        storageSet("handover-log", updated);
+      }
+
+      function startShift(area) {
+        if (sessions.some(s => !s.end)) return;
+        const updated = [{ id: "s-" + Date.now(), date: today, start: new Date().toISOString(), end: null, area: area || "safran" }, ...sessions];
+        setSessions(updated);
+        storageSet("work-sessions", updated);
+      }
+
+      function endShift() {
+        const idx = sessions.findIndex(s => !s.end);
+        if (idx < 0) return;
+        const now = new Date().toISOString();
+        const s = sessions[idx];
+        const hours = Math.round(((new Date(now) - new Date(s.start)) / 3600000) * 100) / 100;
+        const rate = wageSettings.areaRates[s.area] || wageSettings.defaultRate;
+        const updated = sessions.map((x, i) => i === idx ? { ...x, end: now, hours, rate, wage: Math.round(hours * rate) } : x);
+        setSessions(updated);
+        storageSet("work-sessions", updated);
+      }
+
+      function deleteSession(id) {
+        const updated = sessions.filter(s => s.id !== id);
+        setSessions(updated);
+        storageSet("work-sessions", updated);
+      }
+
+      return e("div", { className: "max-w-2xl mx-auto p-4 sm:p-6" },
+        // Hlavička
+        e("div", { className: "flex justify-between items-center mb-6 flex-wrap gap-2" },
+          e("div", null,
+            e("h1", { className: "text-2xl font-bold uppercase text-[#F2A93B]" }, "Provozní deník údržby"),
+            e("p", { className: "text-sm text-gray-400 capitalize" }, new Intl.DateTimeFormat("cs-CZ", { weekday: "long", day: "numeric", month: "long" }).format(new Date()))
+          ),
+          e("button", { onClick: toggleRain, className: `px-4 py-2 rounded-xl text-sm font-semibold border flex items-center gap-2 ${weather.isRaining ? "bg-red-900/30 border-red-500 text-red-400" : "bg-[#2E3338] border-[#3A3F44] text-gray-200"}` },
+            weather.isRaining ? "🌧️ Dnes prší" : "☀️ Dnes je sucho"
+          )
+        ),
+
+        // Záložky navigační menu
+        e("div", { className: "flex gap-2 mb-6 border-b border-[#3A3F44] pb-3 overflow-x-auto" },
+          [
+            { id: "dnes", label: "Dnes" },
+            { id: "katalog", label: "Katalog" },
+            { id: "vykaz", label: "Výkaz práce" },
+            { id: "protokol", label: "Protokol" }
+          ].map(t => e("button", {
+            key: t.id,
+            onClick: () => setTab(t.id),
+            className: `px-4 py-2 rounded-xl text-sm font-semibold transition ${tab === t.id ? "bg-[#F2A93B] text-black" : "text-gray-400 hover:bg-[#2E3338]"}`
+          }, t.label))
+        ),
+
+        // OBSAH ZÁLOŽEK
+        tab === "dnes" && e(DnesView, { dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask: toggleTask, onAddExtra: addExtra, onToggleExtra: toggleExtra, onDeleteExtra: deleteExtra, today }),
+        tab === "katalog" && e(KatalogView, { tasks, onAddTask: addTask, onDeleteTask: deleteTask }),
+        tab === "protokol" && e(ProtokolView, { log, onAddLog: addLogEntry }),
+        tab === "vykaz" && e(VykazView, { sessions, onStart: startShift, onEnd: endShift, onDelete: deleteSession, wageSettings, setWageSettings })
+      );
+    }
+
+    // ---------- Komponenty Záložek ----------
+    function DnesView({ dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra, today }) {
+      const [text, setText] = useState("");
+      return e("div", { className: "space-y-6" },
+        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/20 border border-red-500/40 text-red-400 text-sm" },
+          e("p", { className: "font-semibold mb-1" }, `Odloženo kvůli dešti (${outdoorBlocked.length})`),
+          outdoorBlocked.map(t => e("p", { key: t.id, className: "text-xs opacity-80" }, `• ${t.name}`))
+        ),
+
+        e("div", null,
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Vnitřní úkoly (${dueIndoor.length})`),
+          dueIndoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Žádné plánované vnitřní úkoly na dnes.") :
+          dueIndoor.map(t => e("div", { key: t.id, onClick: () => onToggleTask(t.id), className: "flex items-start gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },
+            e("span", { className: "text-lg" }, t.lastDone === today ? "✅" : "⚪"),
+            e("div", { className: "flex-1" },
+              e("p", { className: `text-sm font-medium ${t.lastDone === today ? "line-through text-gray-500" : ""}` }, t.name),
+              t.notes && e("p", { className: "text-xs text-gray-400 mt-0.5" }, t.notes)
+            )
+          ))
+        ),
+
+        e("div", null,
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Venkovní úkoly (${dueOutdoor.length})`),
+          dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Žádné venkovní úkoly k provedení.") :
+          dueOutdoor.map(t => e("div", { key: t.id, onClick: () => onToggleTask(t.id), className: "flex items-start gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44] cursor-pointer" },
+            e("span", { className: "text-lg" }, t.lastDone === today ? "✅" : "⚪"),
+            e("div", { className: "flex-1" },
+              e("p", { className: `text-sm font-medium ${t.lastDone === today ? "line-through text-gray-500" : ""}` }, t.name),
+              t.notes && e("p", { className: "text-xs text-gray-400 mt-0.5" }, t.notes)
+            )
+          ))
+        ),
+
+        e("div", null,
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Mimořádné úkoly"),
+          extra.map(ex => e("div", { key: ex.id, className: "flex items-center gap-3 p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },
+            e("button", { onClick: () => onToggleExtra(ex.id) }, ex.done ? "✅" : "⚪"),
+            e("span", { className: `flex-1 text-sm ${ex.done ? "line-through text-gray-500" : ""}` }, ex.name),
+            e("button", { onClick: () => onDeleteExtra(ex.id), className: "text-gray-500 hover:text-red-400 text-xs px-2 py-1" }, "Smazat")
+          )),
+          e("div", { className: "flex gap-2 mt-3" },
+            e("input", {
+              value: text,
+              onChange: e => setText(e.target.value),
+              onKeyDown: e => { if (e.key === "Enter") { onAddExtra(text); setText(""); } },
+              placeholder: "Přidat rychlý úkol…",
+              className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none"
+            }),
+            e("button", { onClick: () => { onAddExtra(text); setText(""); }, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm" }, "Přidat")
+          )
+        )
+      );
+    }
+
+    function KatalogView({ tasks, onAddTask, onDeleteTask }) {
+      const [name, setName] = useState("");
+      const [cat, setCat] = useState("indoor");
+      const [interval, setInterval] = useState(7);
+      const [notes, setNotes] = useState("");
+
+      return e("div", { className: "space-y-6" },
+        e("div", { className: "p-4 rounded-xl bg-[#24282C] border border-[#3A3F44]" },
+          e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3" }, "Přidat nový úkol do katalogu"),
+          e("div", { className: "space-y-3" },
+            e("input", { value: name, onChange: e => setName(e.target.value), placeholder: "Název úkolu", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" }),
+            e("div", { className: "flex gap-2" },
+              e("select", { value: cat, onChange: e => setCat(e.target.value), className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" },
+                e("option", { value: "indoor" }, "Vnitřní"),
+                e("option", { value: "outdoor" }, "Venkovní")
+              ),
+              e("input", { type: "number", value: interval, onChange: e => setInterval(Number(e.target.value)), placeholder: "Interval (dní)", className: "w-1/3 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" })
+            ),
+            e("input", { value: notes, onChange: e => setNotes(e.target.value), placeholder: "Poznámka / Upřesnění", className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none" }),
+            e("button", {
+              onClick: () => {
+                if (name.trim()) {
+                  onAddTask({ name, category: cat, interval, notes, months: [], areas: [] });
+                  setName(""); setNotes("");
+                }
+              },
+              className: "w-full py-2.5 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm"
+            }, "Uložit úkol")
+          )
+        ),
+
+        e("div", null,
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `Všechny úkoly (${tasks.length})`),
+          tasks.map(t => e("div", { key: t.id, className: "flex justify-between items-start p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },
+            e("div", null,
+              e("p", { className: "text-sm font-medium" }, t.name),
+              e("p", { className: "text-xs text-gray-400" }, `Opakování: co ${t.interval} dní | ${t.category === "indoor" ? "Vnitřní" : "Venkovní"}`),
+              t.notes && e("p", { className: "text-xs text-gray-500 mt-0.5" }, t.notes)
+            ),
+            e("button", { onClick: () => onDeleteTask(t.id), className: "text-gray-500 hover:text-red-400 text-xs p-1" }, "Smazat")
+          ))
+        )
+      );
+    }
+
+    function ProtokolView({ log, onAddLog }) {
+      const [text, setText] = useState("");
+      return e("div", { className: "space-y-4" },
+        e("div", { className: "flex gap-2" },
+          e("textarea", {
+            value: text,
+            onChange: e => setText(e.target.value),
+            placeholder: "Zapsat poznámku z dnešní směny / stav objektu…",
+            className: "flex-1 p-3 rounded-xl bg-[#24282C] border border-[#3A3F44] text-sm outline-none h-24"
+          })
+        ),
+        e("button", {
+          onClick: () => { onAddLog(text); setText(""); },
+          className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-semibold text-sm w-full"
+        }, "Uložit zápis do deníku"),
+
+        e("div", { className: "pt-4" },
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Historie záznamů"),
+          log.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, "Zatím žádné zápisy.") :
+          log.map(l => e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },
+            e("div", { className: "flex justify-between text-xs text-gray-400 mb-1" },
+              e("span", { className: "font-bold text-[#F2A93B]" }, "Údržbář"),
+              e("span", null, `${l.date} v ${l.time}`)
+            ),
+            e("p", { className: "text-sm text-gray-200 whitespace-pre-line" }, l.text)
+          ))
+        )
+      );
+    }
+
+    function VykazView({ sessions, onStart, onEnd, onDelete, wageSettings, setWageSettings }) {
+      const [selectedArea, setSelectedArea] = useState("safran");
+      const active = sessions.find(s => !s.end);
+      const totalWage = sessions.reduce((acc, s) => acc + (s.wage || 0), 0);
+      const totalHours = Math.round(sessions.reduce((acc, s) => acc + (s.hours || 0), 0) * 100) / 100;
+
+      return e("div", { className: "space-y-6" },
+        // Ovládání směny
+        e("div", { className: "p-4 rounded-xl bg-[#24282C] border border-[#3A3F44] text-center" },
+          active ? e("div", { className: "space-y-3" },
+            e("p", { className: "text-sm text-green-400 font-semibold" }, `⏱️ Probíhá směna od ${new Date(active.start).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })}`),
+            e("button", { onClick: onEnd, className: "w-full py-3 rounded-xl bg-red-500 text-white font-bold text-sm" }, "Ukončit směnu")
+          ) : e("div", { className: "space-y-3" },
+            e("select", { value: selectedArea, onChange: e => setSelectedArea(e.target.value), className: "w-full p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm outline-none mb-2" },
+              AREAS.map(a => e("option", { key: a.id, value: a.id }, a.label))
+            ),
+            e("button", { onClick: () => onStart(selectedArea), className: "w-full py-3 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, "Začít novou směnu")
+          )
+        ),
+
+        // Celkový přehled
+        e("div", { className: "grid grid-cols-2 gap-3" },
+          e("div", { className: "p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-center" },
+            e("p", { className: "text-xs text-gray-400" }, "Odpracováno celkem"),
+            e("p", { className: "text-lg font-bold text-[#F2A93B]" }, `${totalHours} hod`)
+          ),
+          e("div", { className: "p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-center" },
+            e("p", { className: "text-xs text-gray-400" }, "Celková odměna"),
+            e("p", { className: "text-lg font-bold text-green-400" }, `${totalWage} Kč`)
+          )
+        ),
+
+        // Výpis směn
+        e("div", null,
+          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, "Výkaz odpracovaných směn"),
+          sessions.map(s => e("div", { key: s.id, className: "flex justify-between items-center p-3 mb-2 rounded-xl bg-[#24282C] border border-[#3A3F44]" },
+            e("div", null,
+              e("p", { className: "text-sm font-semibold" }, `${s.date} ${s.end ? "" : "(probíhá)"}`),
+              e("p", { className: "text-xs text-gray-400" }, `Objekt: ${(AREAS.find(a=>a.id===s.area)||{}).label || s.area}`),
+              s.hours && e("p", { className: "text-xs text-green-400" }, `${s.hours} h × ${s.rate} Kč = ${s.wage} Kč`)
+            ),
+            s.end && e("button", { onClick: () => onDelete(s.id), className: "text-gray-500 hover:text-red-400 text-xs px-2" }, "Smazat")
+          ))
+        )
+      );
+    }
+
+    // Inicializace Reactu
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(App));
+  </script>
 </body>
 </html>
