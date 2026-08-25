@@ -1,352 +1,201 @@
-<!DOCTYPE html>
-<html lang="cs">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikace Správa Úkolů (React)</title>
-    <!-- React & ReactDOM CDN -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <!-- Babel standalone pro transpilation JSX v prohlížeči -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #f1f5f9;
-            color: #0f172a;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 40px 16px;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 640px;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 16px;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stats-badge {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-group input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .input-group input:focus {
-            border-color: #2563eb;
-        }
-
-        .btn-add {
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 0 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-
-        .btn-add:hover {
-            background: #1d4ed8;
-        }
-
-        .filter-group {
-            display: flex;
-            gap: 8px;
-            background: #f8fafc;
-            padding: 4px;
-            border-radius: 10px;
-        }
-
-        .filter-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn.active {
-            background: white;
-            color: #2563eb;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .task-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            transition: all 0.2s;
-        }
-
-        .task-item:hover {
-            border-color: #cbd5e1;
-            background: white;
-        }
-
-        .task-item.completed .task-text {
-            text-decoration: line-through;
-            color: #94a3b8;
-        }
-
-        .task-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-        }
-
-        .checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #2563eb;
-        }
-
-        .task-text {
-            font-size: 1rem;
-            color: #334155;
-            word-break: break-word;
-        }
-
-        .btn-delete {
-            background: transparent;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;
-            transition: opacity 0.2s, background 0.2s;
-        }
-
-        .btn-delete:hover {
-            opacity: 1;
-            background: #fee2e2;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 32px 16px;
-            color: #94a3b8;
-            font-size: 0.95rem;
-        }
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    body {background-color: #eef2f7}
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; color: #0d121f; -webkit-text-stroke: #0d121f}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; color: #0d121f; -webkit-text-stroke: #0d121f; min-height: 15.0px}
+    span.s1 {font-kerning: none}
+  </style>
 </head>
 <body>
-
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        function App() {
-            const [tasks, setTasks] = useState(() => {
-                const saved = localStorage.getItem('react_tasks');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, text: 'Nainstalovat React a vyzkoušet komponenty', completed: true },
-                    { id: 2, text: 'Vytvořit funkční Todo aplikaci', completed: false }
-                ];
-            });
-            const [input, setInput] = useState('');
-            const [filter, setFilter] = useState('all');
-
-            useEffect(() => {
-                localStorage.setItem('react_tasks', JSON.stringify(tasks));
-            }, [tasks]);
-
-            useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            });
-
-            const addTask = (e) => {
-                e.preventDefault();
-                if (!input.trim()) return;
-                const newTask = {
-                    id: Date.now(),
-                    text: input.trim(),
-                    completed: false
-                };
-                setTasks([newTask, ...tasks]);
-                setInput('');
-            };
-
-            const toggleTask = (id) => {
-                setTasks(tasks.map(task => 
-                    task.id === id ? { ...task, completed: !task.completed } : task
-                ));
-            };
-
-            const deleteTask = (id) => {
-                setTasks(tasks.filter(task => task.id !== id));
-            };
-
-            const filteredTasks = tasks.filter(task => {
-                if (filter === 'active') return !task.completed;
-                if (filter === 'completed') return task.completed;
-                return true;
-            });
-
-            const completedCount = tasks.filter(t => t.completed).length;
-
-            return (
-                <div className="app-container">
-                    <div className="header">
-                        <h1>
-                            <i data-lucide="check-square" style={{color: '#2563eb'}}></i>
-                            Správa Úkolů
-                        </h1>
-                        <span className="stats-badge">
-                            {completedCount} / {tasks.length} hotovo
-                        </span>
-                    </div>
-
-                    <form onSubmit={addTask} className="input-group">
-                        <input
-                            type="text"
-                            placeholder="Co je potřeba udělat?"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                        />
-                        <button type="submit" className="btn-add">
-                            <i data-lucide="plus" style={{width: '18px', height: '18px'}}></i>
-                            Přidat
-                        </button>
-                    </form>
-
-                    <div className="filter-group">
-                        <button 
-                            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                            onClick={() => setFilter('all')}
-                        >
-                            Všechny
-                        </button>
-                        <button 
-                            className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
-                            onClick={() => setFilter('active')}
-                        >
-                            Aktivní
-                        </button>
-                        <button 
-                            className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
-                            onClick={() => setFilter('completed')}
-                        >
-                            Dokončené
-                        </button>
-                    </div>
-
-                    {filteredTasks.length > 0 ? (
-                        <ul className="task-list">
-                            {filteredTasks.map(task => (
-                                <li key={task.id} className={`task-item ${task.completed ? 'completed' : ''}`}>
-                                    <div className="task-left">
-                                        <input
-                                            type="checkbox"
-                                            className="checkbox"
-                                            checked={task.completed}
-                                            onChange={() => toggleTask(task.id)}
-                                        />
-                                        <span className="task-text">{task.text}</span>
-                                    </div>
-                                    <button 
-                                        className="btn-delete" 
-                                        onClick={() => deleteTask(task.id)}
-                                        title="Smazat úkol"
-                                    >
-                                        <i data-lucide="trash-2" style={{width: '18px', height: '18px'}}></i>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <div className="empty-state">
-                            {filter === 'completed' 
-                                ? 'Žádné dokončené úkoly.' 
-                                : filter === 'active' 
-                                ? 'Žádné aktivní úkoly.' 
-                                ? 'Seznam úkolů je prázdný.'}
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="cs"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;Kolo Štěstí&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>* {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>body {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0f172a;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #f8fafc;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>flex-direction: column;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>min-height: 100vh;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 20px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>h1 {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 2rem;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #38bdf8;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.wheel-container {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: relative;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 320px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 320px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 30px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.pointer {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: absolute;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>top: -10px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>left: 50%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translateX(-50%);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-left: 15px solid transparent;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-right: 15px solid transparent;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-top: 25px solid #ef4444;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>z-index: 10;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>canvas {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 50%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: transform 4s cubic-bezier(0.15, 0.99, 0.35, 1);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0284c7;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: white;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: none;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 12px 28px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1.1rem;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: bold;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 8px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: background 0.2s, transform 0.1s;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button:hover {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0369a1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button:active {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: scale(0.96);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>button:disabled {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #475569;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: not-allowed;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.result {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 20px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1.3rem;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: bold;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>min-height: 30px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #4ade80;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;h1&gt;Kolo Štěstí&lt;/h1&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="wheel-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="pointer"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;canvas id="wheel" width="400" height="400"&gt;&lt;/canvas&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;button id="spin-btn"&gt;Zatočit kolem!&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="result" id="result"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const items = ['Úkol 1', 'Úkol 2', 'Úkol 3', 'Úkol 4', 'Úkol 5', 'Úkol 6'];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const colors = ['#f43f5e', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899'];</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const canvas = document.getElementById('wheel');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const ctx = canvas.getContext('2d');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const spinBtn = document.getElementById('spin-btn');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const resultDiv = document.getElementById('result');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const numItems = items.length;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const arcSize = (2 * Math.PI) / numItems;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let currentRotation = 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let isSpinning = false;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Vykreslení kola</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function drawWheel() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const centerX = canvas.width / 2;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const centerY = canvas.height / 2;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const radius = canvas.width / 2 - 10;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>for (let i = 0; i &lt; numItems; i++) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const angle = i * arcSize;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Výseč</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.beginPath();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fillStyle = colors[i % colors.length];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.moveTo(centerX, centerY);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.arc(centerX, centerY, radius, angle, angle + arcSize);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.lineTo(centerX, centerY);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fill();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.stroke();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Text</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.save();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fillStyle = '#ffffff';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.font = 'bold 18px sans-serif';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.translate(centerX, centerY);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.rotate(angle + arcSize / 2);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.textAlign = 'right';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.fillText(items[i], radius - 20, 6);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.restore();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Zatočení kolem</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>spinBtn.addEventListener('click', () =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (isSpinning) return;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">      </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>isSpinning = true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>spinBtn.disabled = true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>resultDiv.textContent = '';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// Náhodné otočení (min 5 plných otáček + náhodný úhel)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const extraDegrees = Math.floor(Math.random() * 360) + 1800;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>currentRotation += extraDegrees;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>canvas.style.transform = `rotate(${currentRotation}deg)`;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// Vyhodnocení výhry po dokončení animace (4s)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>isSpinning = false;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>spinBtn.disabled = false;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const actualDegrees = currentRotation % 360;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Šipka ukazuje nahoru (270 stupňů v Canvas souřadnicích)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const effectiveAngle = (360 - (actualDegrees % 360) + 270) % 360;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const selectedIndex = Math.floor(effectiveAngle / (360 / numItems));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>resultDiv.textContent = `Padlo: ${items[selectedIndex]}`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}, 4000);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>drawWheel();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
 </body>
 </html>
