@@ -9,8 +9,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin="script"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin="script"></script>
 </head>
-<body class="bg-[#1B1E21] text-[#ECECEA] antialiased">
-  <div id="root"></div>
+<body class="bg-[#1B1E21] text-[#ECECEA] antialiased w-full min-h-screen">
+  <div id="root" class="w-full"></div>
 
   <script>
     const { useState, useEffect, useMemo, createElement: e } = React;
@@ -76,9 +76,7 @@
         totalWage: "Celková výplata",
         monthlyClosure: "Měsíční uzávěrka: Náklady podle objektů",
         shiftHistory: "Přehled odpracovaných směn",
-        noSessions: "Zatím nebyla zaznamenána žádná směna.",
-        schedTitle: "🗺️ Master Harmonogram dnu Vládi",
-        schedDesc: "Propojený časový plán pokrývající všech 7 spravovaných objektů pro maximální efektivitu během dne."
+        noSessions: "Zatím nebyla zaznamenána žádná směna."
       },
       ua: {
         title: "Журнал обслуговування та завгоспа",
@@ -136,9 +134,7 @@
         totalWage: "Загальна виплата",
         monthlyClosure: "Щомісячний підсумок: Витрати по об'єктах",
         shiftHistory: "Огляд відпрацьованих змін",
-        noSessions: "Змін поки не зафіксовано.",
-        schedTitle: "🗺️ Головний розклад дня Владі",
-        schedDesc: "Об'єднаний графік, що охоплює всі 7 об'єктів для максимальної ефективності протягом дня."
+        noSessions: "Змін поки не зафіксовано."
       }
     };
 
@@ -401,9 +397,9 @@
         storageSet("work-sessions", updated);
       }
 
-      return e("div", { className: "min-h-screen bg-[#1B1E21] text-[#ECECEA] p-4 sm:p-6 font-sans max-w-4xl mx-auto" },
+      return e("div", { className: "min-h-screen bg-[#1B1E21] text-[#ECECEA] p-4 sm:p-8 font-sans w-full max-w-none" },
         // HLAVIČKA A JAZYKOVÝ PŘEPÍNAČ
-        e("div", { className: "flex flex-wrap justify-between items-center gap-4 mb-4 border-b border-[#3A3F44] pb-4" },
+        e("div", { className: "flex flex-wrap justify-between items-center gap-4 mb-4 border-b border-[#3A3F44] pb-4 w-full" },
           e("div", null,
             e("h1", { className: "text-2xl font-bold uppercase tracking-wide text-[#F2A93B]" }, t.title),
             e("p", { className: "text-xs text-gray-400 capitalize mt-0.5" }, 
@@ -435,15 +431,15 @@
         ),
 
         // INFORMACE O POČASÍ
-        e("div", { className: `mb-4 p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between border ${isRainingActive ? "bg-red-950/40 border-red-500/60 text-red-200" : "bg-emerald-950/40 border-emerald-500/60 text-emerald-200"}` },
+        e("div", { className: `mb-4 p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between border w-full ${isRainingActive ? "bg-red-950/40 border-red-500/60 text-red-200" : "bg-emerald-950/40 border-emerald-500/60 text-emerald-200"}` },
           e("span", null, isRainingActive ? t.rainActive : t.dryActive),
           e("span", { className: "opacity-75 text-[11px]" }, weatherMode === "auto" ? t.sourceApi : t.sourceManual)
         ),
 
-        apiWeather.temp < 18 && e("div", { className: "mb-4 p-3 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-xs" }, t.coldWarning),
+        apiWeather.temp < 18 && e("div", { className: "mb-4 p-3 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-xs w-full" }, t.coldWarning),
 
         // FILTR OBJEKTŮ
-        e("div", { className: "flex items-center gap-2 mb-6 overflow-x-auto pb-2" },
+        e("div", { className: "flex items-center gap-2 mb-6 overflow-x-auto pb-2 w-full" },
           e("button", {
             onClick: () => setSelectedAreaFilter("all"),
             className: `px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${selectedAreaFilter === "all" ? "bg-[#F2A93B] text-black" : "bg-[#24282C] text-gray-400 border border-[#3A3F44]"}`
@@ -461,7 +457,7 @@
         ),
 
         // NAVIGAČNÍ TLAČÍTKA
-        e("div", { className: "flex gap-1.5 mb-6 bg-[#24282C] p-1.5 rounded-2xl border border-[#3A3F44] overflow-x-auto" },
+        e("div", { className: "flex gap-1.5 mb-6 bg-[#24282C] p-1.5 rounded-2xl border border-[#3A3F44] overflow-x-auto w-full" },
           [
             { id: "dnes", label: t.tabDnes },
             { id: "harmonogram", label: t.tabHarmonogram },
@@ -473,7 +469,7 @@
           ].map(tb => e("button", {
             key: tb.id,
             onClick: () => setTab(tb.id),
-            className: `flex-1 min-w-[100px] py-2.5 rounded-xl text-xs font-bold transition text-center whitespace-nowrap ${tab === tb.id ? "bg-[#F2A93B] text-black shadow-md" : "text-gray-400 hover:text-white"}`
+            className: `flex-1 min-w-[120px] py-2.5 rounded-xl text-xs font-bold transition text-center whitespace-nowrap ${tab === tb.id ? "bg-[#F2A93B] text-black shadow-md" : "text-gray-400 hover:text-white"}`
           }, tb.label))
         ),
 
@@ -536,12 +532,12 @@
         }
       ];
 
-      return e("div", { className: "space-y-4" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] mb-4" },
+      return e("div", { className: "space-y-4 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] mb-4 w-full" },
           e("h2", { className: "text-base font-bold text-[#F2A93B] mb-1" }, t.schedTitle),
           e("p", { className: "text-xs text-gray-400" }, t.schedDesc)
         ),
-        schedule.map((item, idx) => e("div", { key: idx, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] relative overflow-hidden" },
+        schedule.map((item, idx) => e("div", { key: idx, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] relative overflow-hidden w-full" },
           e("div", { className: "absolute top-0 left-0 w-2 h-full", style: { backgroundColor: item.color } }),
           e("div", { className: "pl-2" },
             e("div", { className: "flex justify-between items-center mb-2 flex-wrap gap-2" },
@@ -565,8 +561,8 @@
     // ---------- TAB: DNES ----------
     function DnesTab({ dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra, today, isOutdoorBlocked, lang, t }) {
       const [text, setText] = useState("");
-      return e("div", { className: "space-y-6" },
-        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/40 border border-red-500/60 text-red-200" },
+      return e("div", { className: "space-y-6 w-full" },
+        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/40 border border-red-500/60 text-red-200 w-full" },
           e("p", { className: "font-bold text-sm mb-1" }, `${t.skippedRain} (${outdoorBlocked.length})`),
           outdoorBlocked.map(tk => {
             const name = typeof tk.name === "object" ? (tk.name[lang] || tk.name.cz) : tk.name;
@@ -578,19 +574,19 @@
           })
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `${t.indoorTasks} (${dueIndoor.length})`),
           dueIndoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, t.noTasks) :
           dueIndoor.map(tk => e(TaskCard, { key: tk.id, task: tk, onToggle: onToggleTask, today, lang }))
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `${t.outdoorTasks} (${dueOutdoor.length})`),
           dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, t.noTasks) :
           dueOutdoor.map(tk => e(TaskCard, { key: tk.id, task: tk, onToggle: onToggleTask, today, lang }))
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, t.extraTasks),
           extra.map(ex => e("div", { key: ex.id, className: "flex items-center justify-between p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
             e("div", { className: "flex items-center gap-3 cursor-pointer", onClick: () => onToggleExtra(ex.id) },
@@ -621,7 +617,7 @@
 
       return e("div", {
         onClick: () => onToggle(task.id),
-        className: `flex items-start justify-between p-3 mb-2 rounded-xl border cursor-pointer transition ${isCritical ? "bg-red-950/30 border-red-500/80 hover:border-red-400" : "bg-[#2E3338] border-[#3A3F44] hover:border-gray-500"}`
+        className: `flex items-start justify-between p-3 mb-2 rounded-xl border cursor-pointer transition w-full ${isCritical ? "bg-red-950/30 border-red-500/80 hover:border-red-400" : "bg-[#2E3338] border-[#3A3F44] hover:border-gray-500"}`
       },
         e("div", { className: "flex items-start gap-3" },
           e("span", { className: "text-lg mt-0.5" }, isDone ? "✅" : "⚪"),
@@ -646,24 +642,26 @@
     function ObjektyTab({ selectedAreaFilter, lang, t }) {
       const targetAreas = selectedAreaFilter === "all" ? AREAS : AREAS.filter(a => a.id === selectedAreaFilter);
 
-      return e("div", { className: "space-y-4" },
-        targetAreas.map(a => e("div", { key: a.id, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
-          e("div", { className: "flex items-center gap-2 mb-3" },
-            e("div", { className: "w-3.5 h-3.5 rounded-full", style: { backgroundColor: a.color } }),
-            e("h2", { className: "text-base font-bold text-white" }, a.label[lang] || a.label.cz)
-          ),
-          e("div", { className: "space-y-2 text-xs" },
-            e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-              e("p", { className: "font-bold text-[#F2A93B] mb-0.5" }, t.keys),
-              e("p", { className: "text-gray-300" }, a.keys)
+      return e("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full" },
+        targetAreas.map(a => e("div", { key: a.id, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] flex flex-col justify-between" },
+          e("div", null,
+            e("div", { className: "flex items-center gap-2 mb-3" },
+              e("div", { className: "w-3.5 h-3.5 rounded-full", style: { backgroundColor: a.color } }),
+              e("h2", { className: "text-base font-bold text-white" }, a.label[lang] || a.label.cz)
             ),
-            e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-              e("p", { className: "font-bold text-blue-400 mb-0.5" }, t.shutoffs),
-              e("p", { className: "text-gray-300" }, a.shutoffs)
-            ),
-            e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-              e("p", { className: "font-bold text-red-400 mb-0.5" }, t.emergency),
-              e("p", { className: "text-gray-300" }, a.emergency)
+            e("div", { className: "space-y-2 text-xs" },
+              e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
+                e("p", { className: "font-bold text-[#F2A93B] mb-0.5" }, t.keys),
+                e("p", { className: "text-gray-300" }, a.keys)
+              ),
+              e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
+                e("p", { className: "font-bold text-blue-400 mb-0.5" }, t.shutoffs),
+                e("p", { className: "text-gray-300" }, a.shutoffs)
+              ),
+              e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
+                e("p", { className: "font-bold text-red-400 mb-0.5" }, t.emergency),
+                e("p", { className: "text-gray-300" }, a.emergency)
+              )
             )
           )
         ))
@@ -679,8 +677,8 @@
 
       const items = selectedAreaFilter === "all" ? inventory : inventory.filter(i => i.area === selectedAreaFilter);
 
-      return e("div", { className: "space-y-6" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+      return e("div", { className: "space-y-6 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3 uppercase tracking-wider" }, t.addInventory),
           e("div", { className: "space-y-3" },
             e("input", { value: name, onChange: e => setName(e.target.value), placeholder: t.itemPlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
@@ -706,7 +704,7 @@
           )
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `${t.stockState} (${items.length})`),
           items.map(item => {
             const isLow = item.stock < item.minStock;
@@ -741,13 +739,8 @@
       const [substitute, setSubstitute] = useState("");
       const [selectedAreas, setSelectedAreas] = useState(["skola_mp"]);
 
-      function toggleAreaSelection(id) {
-        if (selectedAreas.includes(id)) setSelectedAreas(selectedAreas.filter(a => a !== id));
-        else setSelectedAreas([...selectedAreas, id]);
-      }
-
-      return e("div", { className: "space-y-6" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+      return e("div", { className: "space-y-6 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3 uppercase tracking-wider" }, t.addTaskCatalog),
           e("div", { className: "space-y-3" },
             e("input", { value: name, onChange: e => setName(e.target.value), placeholder: t.taskNamePlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
@@ -778,7 +771,7 @@
           )
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `${t.catalogTitle} (${tasks.length})`),
           tasks.map(tk => {
             const taskName = typeof tk.name === "object" ? (tk.name[lang] || tk.name.cz) : tk.name;
@@ -796,8 +789,8 @@
 
     function ProtokolTab({ log, onAddLog, lang, t }) {
       const [text, setText] = useState("");
-      return e("div", { className: "space-y-6" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+      return e("div", { className: "space-y-6 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-2" }, t.logTitle),
           e("textarea", {
             value: text,
@@ -811,7 +804,7 @@
           )
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, t.logHistory),
           log.map(l => e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
             e("div", { className: "flex justify-between text-xs text-gray-400 mb-1" },
@@ -843,8 +836,8 @@
       const totalWage = sessions.reduce((acc, s) => acc + (s.wage || 0), 0);
       const totalHours = Math.round(sessions.reduce((acc, s) => acc + (s.hours || 0), 0) * 100) / 100;
 
-      return e("div", { className: "space-y-6" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
+      return e("div", { className: "space-y-6 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center w-full" },
           active ? e("div", { className: "space-y-3" },
             e("p", { className: "text-sm text-green-400 font-bold" }, `${t.shiftRunning} (${new Date(active.start).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })})`),
             e("button", { onClick: onEnd, className: "w-full py-3 rounded-xl bg-red-500 text-white font-bold text-sm shadow-lg" }, t.endShift)
@@ -857,7 +850,7 @@
           )
         ),
 
-        e("div", { className: "grid grid-cols-2 gap-4" },
+        e("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 w-full" },
           e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
             e("p", { className: "text-xs text-gray-400 uppercase font-bold" }, t.totalWorked),
             e("p", { className: "text-2xl font-bold text-[#F2A93B] mt-1" }, `${totalHours} h`)
@@ -868,7 +861,7 @@
           )
         ),
 
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, t.monthlyClosure),
           Object.keys(breakdownByArea).map(areaId => {
             const item = breakdownByArea[areaId];
