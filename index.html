@@ -32,6 +32,7 @@
         coldWarning: "Ranní chlad (<18°C): Vytvořena priorita pro ranní zátop v Jurtě, Mobilheimu a Školním prostoru!",
         allAreas: "Všechny objekty",
         tabDnes: "Dnes & Úkoly",
+        tabZitra: "📌 Plán a potřeby na zítra",
         tabHarmonogram: "📅 Master Harmonogram",
         tabObjekty: "Objekty & Pasport",
         tabSklad: "Sklad & Materiál",
@@ -78,7 +79,11 @@
         shiftHistory: "Přehled odpracovaných směn",
         noSessions: "Zatím nebyla zaznamenána žádná směna.",
         schedTitle: "🗺️ Master Harmonogram dnu Vládi",
-        schedDesc: "Propojený časový plán pokrývající všech 7 spravovaných objektů pro maximální efektivitu během dne."
+        schedDesc: "Propojený časový plán pokrývající všech 7 spravovaných objektů pro maximální efektivitu během dne.",
+        zitraTitle: "📌 Přehled plánu & potřeb na zítřek",
+        zitraDesc: "Co Vláďu zítra čeká, jaké nářadí a materiál si připravit a na co se dopředu zařídit.",
+        zitraNoTasks: "Na zítřejší den nejsou naplánované žádné specifické periodické úkoly.",
+        prepNotice: "💡 Co si připravit a zařídit na zítřek:"
       },
       ua: {
         title: "Журнал обслуговування та завгоспа",
@@ -92,6 +97,7 @@
         coldWarning: "Ранковий холод (<18°C): Створено пріоритет для ранкового розпалювання в Юрті та Шкільному просторі!",
         allAreas: "Усі об'єкти",
         tabDnes: "Сьогодні та завдання",
+        tabZitra: "📌 План та потреби на завтра",
         tabHarmonogram: "📅 Головний розклад",
         tabObjekty: "Об'єкти та паспортизація",
         tabSklad: "Склад та матеріали",
@@ -138,7 +144,11 @@
         shiftHistory: "Огляд відпрацьованих змін",
         noSessions: "Змін поки не зафіксовано.",
         schedTitle: "🗺️ Головний розклад дня Владі",
-        schedDesc: "Об'єднаний графік, що охоплює всі 7 об'єктів для максимальної ефективності протягом дня."
+        schedDesc: "Об'єднаний графік, що охоплює всі 7 об'єктів для максимальної ефективності протягом дня.",
+        zitraTitle: "📌 Огляд плану та потреб на завтра",
+        zitraDesc: "Що чекає на Владі завтра, які інструменти та матеріали підготувати.",
+        zitraNoTasks: "На завтра немає запланованих специфічних періодичних завдань.",
+        prepNotice: "💡 Що підготувати та організувати на завтра:"
       }
     };
 
@@ -235,6 +245,11 @@
     ];
 
     function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function tomorrowStr() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().slice(0, 10);
+    }
     function daysBetween(a, b) { return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000); }
     function isSeasonActive(t, m) { return !t.months || t.months.length === 0 || t.months.includes(m); }
     function isDue(t, today) { return !t.lastDone || daysBetween(t.lastDone, today) >= t.interval; }
@@ -287,7 +302,9 @@
       }
 
       const today = todayStr();
+      const tomorrow = tomorrowStr();
       const month = new Date().getMonth() + 1;
+      const tomorrowMonth = new Date(Date.now() + 86400000).getMonth() + 1;
       const isRainingActive = weatherMode === "rain" ? true : (weatherMode === "dry" ? false : apiWeather.isRaining);
 
       const filteredTasks = useMemo(() => {
@@ -297,6 +314,10 @@
 
       const due = useMemo(() => filteredTasks.filter(tk => isSeasonActive(tk, month) && isDue(tk, today)), [filteredTasks, month, today]);
       
+      const tomorrowDue = useMemo(() => {
+        return filteredTasks.filter(tk => isSeasonActive(tk, tomorrowMonth) && isDue(tk, tomorrow));
+      }, [filteredTasks, tomorrowMonth, tomorrow]);
+
       const sortedDue = useMemo(() => {
         const pMap = { critical: 0, high: 1, medium: 2, low: 3 };
         return [...due].sort((a, b) => (pMap[a.priority || "medium"] - pMap[b.priority || "medium"]));
@@ -464,6 +485,7 @@
         e("div", { className: "flex gap-1.5 mb-6 bg-[#24282C] p-1.5 rounded-2xl border border-[#3A3F44] overflow-x-auto" },
           [
             { id: "dnes", label: t.tabDnes },
+            { id: "zitra", label: t.tabZitra },
             { id: "harmonogram", label: t.tabHarmonogram },
             { id: "objekty", label: t.tabObjekty },
             { id: "sklad", label: t.tabSklad },
@@ -479,12 +501,52 @@
 
         // SECKCE ZÁLOŽEK
         tab === "dnes" && e(DnesTab, { dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask: toggleTask, onAddExtra: addExtra, onToggleExtra: toggleExtra, onDeleteExtra: deleteExtra, today, isOutdoorBlocked: isRainingActive, lang, t }),
+        tab === "zitra" && e(ZitraTab, { tomorrowDue, lang, t }),
         tab === "harmonogram" && e(HarmonogramTab, { lang, t }),
         tab === "objekty" && e(ObjektyTab, { selectedAreaFilter, lang, t }),
         tab === "sklad" && e(SkladTab, { inventory, onUpdateStock: updateStock, onAddItem: addInventoryItem, selectedAreaFilter, lang, t }),
         tab === "katalog" && e(KatalogTab, { tasks: filteredTasks, onAddTask: addTask, onDeleteTask: deleteTask, lang, t }),
         tab === "protokol" && e(ProtokolTab, { log, onAddLog: addLogEntry, lang, t }),
         tab === "vykaz" && e(VykazTab, { sessions, onStart: startShift, onEnd: endShift, onDelete: deleteSession, wageSettings, setWageSettings, lang, t })
+      );
+    }
+
+    // ---------- TAB: PLÁN A POTŘEBY NA ZÍTRA ----------
+    function ZitraTab({ tomorrowDue, lang, t }) {
+      const dateTomorrowFormatted = new Date(Date.now() + 86400000).toLocaleDateString(lang === "cz" ? "cs-CZ" : "uk-UA", { weekday: "long", day: "numeric", month: "numeric" });
+
+      return e("div", { className: "space-y-4" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] mb-4" },
+          e("h2", { className: "text-base font-bold text-[#F2A93B] mb-1" }, t.zitraTitle),
+          e("p", { className: "text-xs text-gray-400" }, `${t.zitraDesc} (${dateTomorrowFormatted})`)
+        ),
+
+        tomorrowDue.length === 0 ? e("div", { className: "bg-[#24282C] p-6 rounded-2xl border border-[#3A3F44] text-center text-sm text-gray-400" }, t.zitraNoTasks) :
+        tomorrowDue.map(tk => {
+          const name = typeof tk.name === "object" ? (tk.name[lang] || tk.name.cz) : tk.name;
+          const notes = typeof tk.notes === "object" ? (tk.notes[lang] || tk.notes.cz) : tk.notes;
+          const isCritical = tk.priority === "critical";
+
+          return e("div", { key: tk.id, className: `p-4 rounded-2xl border space-y-3 ${isCritical ? "bg-red-950/30 border-red-500/80" : "bg-[#24282C] border-[#3A3F44]"}` },
+            e("div", { className: "flex justify-between items-start gap-2 flex-wrap" },
+              e("div", { className: "flex items-center gap-2 flex-wrap" },
+                e("h3", { className: "text-base font-bold text-white" }, name),
+                isCritical && e("span", { className: "bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded" }, "Kritická"),
+                tk.tag && e("span", { className: "bg-gray-700 text-gray-300 text-[10px] px-2.5 py-0.5 rounded-full" }, tk.tag)
+              ),
+              e("div", { className: "flex gap-1 flex-wrap" },
+                (tk.areas || []).map(aId => {
+                  const area = AREAS.find(a => a.id === aId);
+                  return area ? e("span", { key: aId, className: "text-[10px] px-2 py-0.5 rounded-full font-bold", style: { backgroundColor: area.color + "22", color: area.color, border: `1px solid ${area.color}55` } }, area.label[lang] || area.label.cz) : null;
+                })
+              )
+            ),
+            notes && e("div", { className: "p-3 bg-[#1E2124] rounded-xl border-l-4 border-[#F2A93B] text-xs" },
+              e("p", { className: "font-bold text-[#F2A93B] mb-1" }, t.prepNotice),
+              e("p", { className: "text-gray-300 leading-relaxed" }, notes)
+            )
+          );
+        })
       );
     }
 
