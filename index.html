@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin="script"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin="script"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-[#1B1E21] text-[#ECECEA] antialiased w-full min-h-screen">
   <div id="root" class="w-full"></div>
@@ -15,10 +17,14 @@
   <script>
     const { useState, useEffect, useMemo, createElement: e } = React;
 
+    // INICIALIZACE SUPABASE CLOUDU
+    const SUPABASE_URL = "https://hqxfbgnyvnshusbdtutp.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_rjV_H9rO9jV0P-SZX0masg_XJHkOfS7";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const TROJA_LAT = 50.1162;
     const TROJA_LON = 14.4175;
 
-    // PREKLADOVY SLOVNIK UI
     const I18N = {
       cz: {
         title: "Provozní deník údržby & školníka",
@@ -45,7 +51,7 @@
         noSubstitute: "➔ Bez definované náhradní činnosti (přeskočit)",
         indoorTasks: "Vnitřní & Kryté úkoly",
         outdoorTasks: "Venkovní úkoly",
-        extraTasks: "Mimořádné úkoly dnes",
+        extraTasks: "Mimořádné úkoly dnes (Cloud - Sdílené)",
         addExtraPlaceholder: "Přidat mimořádný úkol…",
         add: "Přidat",
         delete: "Smazat",
@@ -105,7 +111,7 @@
         noSubstitute: "➔ Без альтернативного завдання (пропустити)",
         indoorTasks: "Внутрішні та криті завдання",
         outdoorTasks: "Зовнішні завдання",
-        extraTasks: "Позапланові завдання на сьогодні",
+        extraTasks: "Позапланові завдання на сьогодні (Cloud)",
         addExtraPlaceholder: "Додати позапланове завдання…",
         add: "Додати",
         delete: "Видалити",
@@ -130,7 +136,7 @@
         saveLog: "Зберегти звичайний запис",
         saveLogBacklog: "🚨 Записати та перенести в Backlog",
         logHistory: "Історія звітів",
-        shiftRunning: "⏱️ Відлік часу триває",
+        shiftRunning: "Відлік часу триває",
         endShift: "Завершити зміну",
         selectObject: "Оберіть об'єкт для нової зміни:",
         startShift: "Розпочати зміну",
@@ -152,315 +158,223 @@
       { id: "vrchlabi", label: { cz: "Vrchlabí 172", ua: "Врхлабі 172" }, color: "#9A8B3F", keys: "Kódový box u hlavních dveří (Kód: 5544)", shutoffs: "Uzávěr vody: Sklep pod schody. Kotel/Plyn: Technická místnost 1.P.", emergency: "Horský servis kotlů Vrchlabí: 775 222 333" }
     ];
 
+    const MASTER_SCHEDULE = [
+      { id: "sch1", time: "07:00 - 08:00", title: { cz: "Ranní odblokování & Kontrola Školky/Školy MP", ua: "Ранкове розблокування та перевірка школи" }, areaId: "skola_mp", desc: { cz: "Kontrola chodníků, příchodových tras, odemknutí vchodů, prověření vytápění/teploty v učebnách.", ua: "Перевірка підходів, розблокування входів, перевірка опалення в класах." } },
+      { id: "sch2", time: "08:00 - 09:00", title: { cz: "Zátop & Ranní obchůzka Troja (Šafrán, Jurta, Mobilheim)", ua: "Розпалювання та ранковий обхід Трої" }, areaId: "safran", desc: { cz: "Zátop v kamnech (při chladu), vizuální kontrola ohradníku, vody, doplnění krmiva/vody zvířatům.", ua: "Розпалювання печей у холод, перевірка огорожі, води та годування тварин." } },
+      { id: "sch3", time: "09:00 - 11:30", title: { cz: "Hlavní blok údržby – Venkovní / Dílna (podle počasí)", ua: "Основний блок обслуговування – Зовнішні / Майстерня" }, areaId: "komunitni", desc: { cz: "Plnění plánovaných úkolů z Deníku (sekání, opravy, stavební práce, řezání dřeva).", ua: "Виконання запланованих завдань із журналу (косіння, ремонт, заготовлення дров)." } },
+      { id: "sch4", time: "11:30 - 12:00", title: { cz: "Průběžný úklid dílny, doplnění zásob & kontrola nářadí", ua: "Прибирання майстерні, поповнення запасів" }, areaId: "safran", desc: { cz: "Úklid strojů, dobíjení akumulátorů, evidence spotřebovaného materiálu do Skladu.", ua: "Очищення інструментів, зарядка акумуляторів, облік матеріалів." } },
+      { id: "sch5", time: "12:00 - 12:30", title: { cz: "Pauza na oběd & Kontrola deníku", ua: "Обідня перерва та перевірка журналу" }, areaId: "safran", desc: { cz: "Přehled odpoledních úkolů a synchronizace požadavků.", ua: "Перегляд пополудневих завдань." } },
+      { id: "sch6", time: "12:30 - 15:00", title: { cz: "Odpolední blok údržby & Operativní ad-hoc požadavky", ua: "Денний блок обслуговування та оперативні завдання" }, areaId: "skolni", desc: { cz: "Řešení nahlášených závad, drobné instalatérské/truhlářské opravy na objektech.", ua: "Усунення повідомлених несправностей, дрібний сантехнічний/теслярський ремонт." } },
+      { id: "sch7", time: "15:00 - 15:30", title: { cz: "Večerní zajištění objektů, uzamčení & Zápis do Deníku", ua: "Вечірнє закриття об'єктів та запис у журнал" }, areaId: "skola_mp", desc: { cz: "Zamykání bran, kontrola zhašených světel/kamenných kamen, finální výkaz práce.", ua: "Замикання воріт, перевірка вимкнення світла/печей, підсумковий звіт." } }
+    ];
+
     const SEED_TASKS = [
-      { 
-        id: "smp1", 
-        name: { cz: "Škola MP: Ranní odblokování vstupů & kontrola trasy dětí", ua: "Школа МП: Ранкове розблокування входів та перевірка маршруту дітей" }, 
-        role: "skolnik", category: "outdoor", priority: "high", tag: "Revize", areas: ["skola_mp"], months: [], interval: 1, 
-        notes: { cz: "Kontrola chodníků, odstranění skla/větví, odemknutí brány do 7:30.", ua: "Перевірка тротуарів, прибирання скла/гілок, відмикання воріт до 7:30." }, 
-        substitute: { cz: "Kontrola těsnosti oken a svítidel na chodbách", ua: "Перевірка щільності вікон та світильників у коридорах" }, 
-        lastDone: null 
-      },
-      { 
-        id: "smp2", 
-        name: { cz: "Škola MP: Kontrola TZB, topení & větrání učeben", ua: "Школа МП: Перевірка опалення та провітрювання класів" }, 
-        role: "skolnik", category: "indoor", priority: "high", tag: "Topení", areas: ["skola_mp"], months: [], interval: 1, 
-        notes: { cz: "Zajištění komfortní teploty před začátkem výuky.", ua: "Забезпечення комфортної температури до початку уроків." }, 
-        lastDone: null 
-      },
-      { 
-        id: "smp3", 
-        name: { cz: "Škola MP: Kontrola sociálních zařízení & doplňování hygieny", ua: "Школа МП: Перевірка санвузлів та поповнення гігієни" }, 
-        role: "skolnik", category: "indoor", priority: "medium", tag: "Voda/Instalatérství", areas: ["skola_mp"], months: [], interval: 1, 
-        notes: { cz: "Doplnění mýdel, ručníků, kontrola úniků vody na WC.", ua: "Доповнення мила, рушників, перевірка витоків води у туалетах." }, 
-        lastDone: null 
-      },
-      { 
-        id: "smp4", 
-        name: { cz: "Dílna MP: Údržba nářadí (broušení dlátek, kontrola pil)", ua: "Майстерня МП: Обслуговування інструментів (загострення стамесок)" }, 
-        role: "lektor", category: "indoor", priority: "high", tag: "Revize", areas: ["skola_mp"], months: [], interval: 7, 
-        notes: { cz: "Broušení ručního nářadí, kontrola přívodních kabelů elektrického nářadí.", ua: "Загострення інструментів, перевірка кабелів електроінструменту." }, 
-        lastDone: null 
-      },
-      { 
-        id: "smp5", 
-        name: { cz: "Dílna MP: Čištění odsávání pilin & odprášení dílny", ua: "Майстерня МП: Очищення витяжки тирси та знепилення" }, 
-        role: "lektor", category: "indoor", priority: "critical", tag: "Elektro", areas: ["skola_mp"], months: [], interval: 3, 
-        notes: { cz: "Prevence požáru a prašnosti. Vyprázdnění sběrných vaků odsávání.", ua: "Запобігання пожежі. Спорожнення мішків витяжної системи." }, 
-        lastDone: null 
-      },
-      { 
-        id: "smp6", 
-        name: { cz: "Dílna MP: Příprava dřevěného materiálu pro výuku", ua: "Майстерня МП: Підготовка деревини для занять" }, 
-        role: "lektor", category: "indoor", priority: "medium", tag: "Stavební", areas: ["skola_mp"], months: [], interval: 7, 
-        notes: { cz: "Formátování prken, hranolků a překližek pro dětské projekty.", ua: "Розпилювання дощок та брусків для дитячих проектів." }, 
-        lastDone: null 
-      },
-      { 
-        id: "smp7", 
-        name: { cz: "Škola MP: Test hlásičů kouře & kontroly únikových cest", ua: "Школа МП: Тест датчиків диму та евакуаційних шляхів" }, 
-        role: "skolnik", category: "indoor", priority: "critical", tag: "Revize", areas: ["skola_mp"], months: [], interval: 30, 
-        notes: { cz: "Zkouška čidel a prověření volného průchodu k únikovým východům.", ua: "Перевірка датчиків та вільного доступу до запасних виходів." }, 
-        lastDone: null 
-      },
-      { 
-        id: "v7", 
-        name: { cz: "Dílna Šafrán: Údržba techniky (sekačky, křovinořezy)", ua: "Майстерня Шафран: Обслуговування техніки (газонокосарки)" }, 
-        role: "udrzbar", category: "indoor", priority: "medium", tag: "Zahrada", areas: ["safran"], months: [], interval: 30, 
-        notes: { cz: "Kontrola oleje, svíček, nabití aku baterií, broušení nožů.", ua: "Перевірка мастила, свічок, зарядка акумуляторів, заточування ножів." }, 
-        lastDone: null 
-      },
-      { 
-        id: "s1", 
-        name: { cz: "Šafrán: Kontrola a čištění lapačů tuku a odpadů", ua: "Шафран: Очищення жировловлювачів та стоків" }, 
-        role: "udrzbar", category: "indoor", priority: "high", tag: "Voda/Instalatérství", areas: ["safran"], months: [], interval: 60, 
-        notes: { cz: "Kontrola průchodnosti syfonů, výměna filtrů a sanace odpadů.", ua: "Перевірка сифонів, заміна фільтрів та промивання стоків." }, 
-        lastDone: null 
-      },
-      { 
-        id: "v1_heat", 
-        name: { cz: "Školní pr.: Ranní zátop v jurtě a mobilheimu (<18°C)", ua: "Шкільний простір: Ранкове розпалювання в юрті (<18°C)" }, 
-        role: "udrzbar", category: "indoor", priority: "high", tag: "Topení", areas: ["skolni"], months: [9, 10, 11, 12, 1, 2, 3, 4], interval: 1, 
-        notes: { cz: "Zatopit před příchodem dětí do 7:30.", ua: "Розпалити піч до приходу дітей до 7:30." }, 
-        lastDone: null 
-      }
+      { id: "smp1", name: { cz: "Škola MP: Ranní odblokování vstupů & kontrola trasy dětí", ua: "Школа МП: Ранкове розблокування входів та перевірка маршруту дітей" }, role: "skolnik", category: "outdoor", priority: "high", tag: "Revize", areas: ["skola_mp"], months: [], interval: 1, notes: { cz: "Kontrola chodníků, odstranění skla/větví, odemknutí brány do 7:30.", ua: "Перевірка тротуарів, прибирання скла/гілок, відмикання воріт до 7:30." }, substitute: { cz: "Kontrola těsnosti oken a svítidel na chodbách", ua: "Перевірка щільності вікон та світильників у коридорах" }, lastDone: null },
+      { id: "smp2", name: { cz: "Škola MP: Kontrola TZB, topení & větrání učeben", ua: "Школа МП: Перевірка опалення та провітрювання класів" }, role: "skolnik", category: "indoor", priority: "high", tag: "Topení", areas: ["skola_mp"], months: [], interval: 1, notes: { cz: "Zajištění komfortní teploty před začátkem výuky.", ua: "Забезпечення комфортної температури до початку уроків." }, lastDone: null },
+      { id: "smp3", name: { cz: "Škola MP: Kontrola sociálních zařízení & doplňování hygieny", ua: "Школа МП: Перевірка санвузлів та поповнення гігієни" }, role: "skolnik", category: "indoor", priority: "medium", tag: "Voda/Instalatérství", areas: ["skola_mp"], months: [], interval: 1, notes: { cz: "Doplnění mýdel, ručníků, kontrola úniků vody na WC.", ua: "Доповнення мила, рушників, перевірка витоків води у туалетах." }, lastDone: null },
+      { id: "t1", name: { cz: "Ranní vyčištění popela & příprava dřeva na zátop", ua: "Ранкове очищення попелу та заготовка дров" }, role: "udrzba", category: "indoor", priority: "high", tag: "Topení", areas: ["safran", "skolni"], months: [10, 11, 12, 1, 2, 3, 4], interval: 1, notes: { cz: "Vymést popel, připravit Třísky + brikety/dřevo do zásoby u kamen.", ua: "Вимести попіл, приготувати тріски та дрова біля печі." }, lastDone: null },
+      { id: "t2", name: { cz: "Kontrola těsnosti spojů kamen & kouřovodů", ua: "Перевірка герметичності димоходів та печі" }, role: "udrzba", category: "indoor", priority: "critical", tag: "Topení", areas: ["safran", "komunitni", "skolni"], months: [], interval: 30, notes: { cz: "Vizuální prověrka tmelu a spojů, zkouška tahu.", ua: "Візуальна перевірка швів та тяги." }, lastDone: null },
+      { id: "t3", name: { cz: "Sečení trávy na pozemku & úprava okrajů", ua: "Косіння трави на ділянці та обрізка країв" }, role: "udrzba", category: "outdoor", priority: "medium", tag: "Zahrada/Areál", areas: ["safran", "komunitni"], months: [5, 6, 7, 8, 9], interval: 14, notes: { cz: "Vyžínání kolem plotu a záhonů.", ua: "Обкошування біля паркану та клумб." }, substitute: { cz: "Úklid a ostření zahradního nářadí v dílně", ua: "Очищення та заточування садового інструменту в майстерні" }, lastDone: null },
+      { id: "t4", name: { cz: "Kontrola a čistění dešťových okapů / gajgrů", ua: "Перевірка та очищення водостоків" }, role: "udrzba", category: "outdoor", priority: "medium", tag: "Střecha/Okap", areas: ["safran", "skolni", "hrastice", "vrchlabi"], months: [], interval: 60, notes: { cz: "Odstranění listí a nečistot z lapačů střešních vtoků.", ua: "Видалення листя та сміття з ринв." }, substitute: { cz: "Kontrola vnitřních sifonů a čišění lapačů tuků", ua: "Перевірка внутрішніх сифонів" }, lastDone: null }
     ];
 
     const SEED_INVENTORY = [
-      { id: "i0", name: { cz: "Lipové dřevo (přířezy pro dílny)", ua: "Липові заготовки для майстерні" }, area: "skola_mp", stock: 15, minStock: 5, unit: "ks" },
-      { id: "i0b", name: { cz: "Brusný papír P120/P240", ua: "Шліфувальний папір P120/P240" }, area: "skola_mp", stock: 8, minStock: 10, unit: "balení" },
-      { id: "i1", name: { cz: "Posypová sůl (25kg pytel)", ua: "Сіль для посипання (мішок 25кг)" }, area: "vrchlabi", stock: 1, minStock: 3, unit: "pytel" },
-      { id: "i2", name: { cz: "Motorový olej 10W-40 (4T)", ua: "Моторне мастило 10W-40 (4T)" }, area: "safran", stock: 2, minStock: 1, unit: "litr" },
-      { id: "i3", name: { cz: "Baterie CR2032 (Čidla CO/Kouř)", ua: "Батарейки CR2032 (Датчики CO/диму)" }, area: "byty", stock: 2, minStock: 5, unit: "ks" }
+      { id: "i1", name: { cz: "Palivové dřevo tvrdé (prms)", ua: "Дрова твердих порід (prms)" }, qty: 4, min: 2, unit: "m³", area: "safran" },
+      { id: "i2", name: { cz: "Motorový olej 10W-40 (do sekačky)", ua: "Моторна олива 10W-40" }, qty: 1, min: 2, unit: "l", area: "safran" },
+      { id: "i3", name: { cz: "Sáčky do vysavače průmyslového", ua: "Мішки для промислового пилососа" }, qty: 12, min: 5, unit: "ks", area: "skola_mp" },
+      { id: "i4", name: { cz: "Náhradní žárovky LED E27 10W", ua: "Запасні LED лампочки E27 10W" }, qty: 8, min: 10, unit: "ks", area: "byty" }
     ];
 
     function todayStr() { return new Date().toISOString().slice(0, 10); }
-    function daysBetween(a, b) { return Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000); }
-    function isSeasonActive(t, m) { return !t.months || t.months.length === 0 || t.months.includes(m); }
-    function isDue(t, today) { return !t.lastDone || daysBetween(t.lastDone, today) >= t.interval; }
-    
-    function storageGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
-    function storageSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
 
     function App() {
-      const [lang, setLang] = useState(() => storageGet("app-lang") || "cz");
+      const [lang, setLang] = useState(() => localStorage.getItem("app_lang") || "cz");
       const [tab, setTab] = useState("dnes");
-      const [tasks, setTasks] = useState([]);
-      const [inventory, setInventory] = useState([]);
+      const [tasks, setTasks] = useState(() => {
+        const saved = localStorage.getItem("app_tasks");
+        return saved ? JSON.parse(saved) : SEED_TASKS;
+      });
       const [weatherMode, setWeatherMode] = useState("auto");
-      const [apiWeather, setApiWeather] = useState({ isRaining: false, temp: 16, wind: 3, loaded: false });
+      const [apiWeather, setApiWeather] = useState({ isRaining: false, temp: 16, wind: 3 });
+      const [inventory, setInventory] = useState(() => {
+        const saved = localStorage.getItem("app_inventory");
+        return saved ? JSON.parse(saved) : SEED_INVENTORY;
+      });
+      const [logs, setLogs] = useState(() => {
+        const saved = localStorage.getItem("app_logs");
+        return saved ? JSON.parse(saved) : [];
+      });
+      const [workSessions, setWorkSessions] = useState(() => {
+        const saved = localStorage.getItem("app_sessions");
+        return saved ? JSON.parse(saved) : [];
+      });
+      const [activeSession, setActiveSession] = useState(() => {
+        const saved = localStorage.getItem("app_active_session");
+        return saved ? JSON.parse(saved) : null;
+      });
+      
+      // SUPABASE DATA STATE FOR EXTRA/CLOUD TASKS
       const [extra, setExtra] = useState([]);
-      const [log, setLog] = useState([]);
-      const [sessions, setSessions] = useState([]);
       const [selectedAreaFilter, setSelectedAreaFilter] = useState("all");
-      const [wageSettings, setWageSettings] = useState({ defaultRate: 300, areaRates: { safran: 300, komunitni: 300, skolni: 300, skola_mp: 320, byty: 350, hrastice: 350, vrchlabi: 350 } });
 
       const t = I18N[lang];
+      const today = todayStr();
+
+      useEffect(() => { localStorage.setItem("app_lang", lang); }, [lang]);
+      useEffect(() => { localStorage.setItem("app_tasks", JSON.stringify(tasks)); }, [tasks]);
+      useEffect(() => { localStorage.setItem("app_inventory", JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem("app_logs", JSON.stringify(logs)); }, [logs]);
+      useEffect(() => { localStorage.setItem("app_sessions", JSON.stringify(workSessions)); }, [workSessions]);
+      useEffect(() => {
+        if (activeSession) localStorage.setItem("app_active_session", JSON.stringify(activeSession));
+        else localStorage.removeItem("app_active_session");
+      }, [activeSession]);
+
+      // REALTIME NAČÍTÁNÍ ZE SUPABASE CLOUDU
+      const fetchCloudTasks = async () => {
+        const { data, error } = await supabase.from('tasks').select('*');
+        if (!error && data) {
+          const mapped = data.map(item => ({
+            id: item.id,
+            name: { cz: item.title, ua: item.title },
+            status: item.status,
+            priority: item.priority === 'Kritická' ? 'critical' : item.priority === 'Vysoká' ? 'high' : 'medium',
+            category: 'indoor',
+            areas: ['skola_mp'],
+            lastDone: item.status === 'Done' ? today : null,
+            notes: { cz: item.description || '', ua: item.description || '' }
+          }));
+          setExtra(mapped);
+        }
+      };
 
       useEffect(() => {
-        setTasks(storageGet("tasks-catalog") || SEED_TASKS);
-        setInventory(storageGet("inventory-data") || SEED_INVENTORY);
-        setExtra(storageGet("extra-tasks") || []);
-        setLog(storageGet("handover-log") || []);
-        setSessions(storageGet("work-sessions") || []);
-        const ws = storageGet("wage-settings");
-        if (ws) setWageSettings(ws);
+        fetchCloudTasks();
 
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${TROJA_LAT}&longitude=${TROJA_LON}&current_weather=true`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.current_weather) {
-              setApiWeather({
-                isRaining: data.current_weather.weathercode >= 51,
-                temp: data.current_weather.temperature,
-                wind: data.current_weather.windspeed,
-                loaded: true
-              });
-            }
+        const channel = supabase
+          .channel('schema-db-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+            fetchCloudTasks();
           })
-          .catch(err => console.error("API error:", err));
+          .subscribe();
+
+        return () => { supabase.removeChannel(channel); };
       }, []);
 
-      function changeLang(l) {
-        setLang(l);
-        storageSet("app-lang", l);
-      }
-
-      const today = todayStr();
-      const month = new Date().getMonth() + 1;
-      const isRainingActive = weatherMode === "rain" ? true : (weatherMode === "dry" ? false : apiWeather.isRaining);
-
-      const filteredTasks = useMemo(() => {
-        if (selectedAreaFilter === "all") return tasks;
-        return tasks.filter(tk => tk.areas && tk.areas.includes(selectedAreaFilter));
-      }, [tasks, selectedAreaFilter]);
-
-      const due = useMemo(() => filteredTasks.filter(tk => isSeasonActive(tk, month) && isDue(tk, today)), [filteredTasks, month, today]);
-      
-      const sortedDue = useMemo(() => {
-        const pMap = { critical: 0, high: 1, medium: 2, low: 3 };
-        return [...due].sort((a, b) => (pMap[a.priority || "medium"] - pMap[b.priority || "medium"]));
-      }, [due]);
-
-      const dueIndoor = sortedDue.filter(tk => tk.category === "indoor");
-      const dueOutdoor = isRainingActive ? [] : sortedDue.filter(tk => tk.category === "outdoor");
-      const outdoorBlocked = isRainingActive ? sortedDue.filter(tk => tk.category === "outdoor") : [];
-
-      function toggleTask(id) {
-        const updated = tasks.map(tk => tk.id === id ? { ...tk, lastDone: tk.lastDone === today ? null : today } : tk);
-        setTasks(updated);
-        storageSet("tasks-catalog", updated);
-      }
-
-      function addExtra(name) {
-        if (!name.trim()) return;
-        const updated = [...extra, { id: "e-" + Date.now(), name, done: false, date: today }];
-        setExtra(updated);
-        storageSet("extra-tasks", updated);
-      }
-
-      function toggleExtra(id) {
-        const updated = extra.map(ex => ex.id === id ? { ...ex, done: !ex.done } : ex);
-        setExtra(updated);
-        storageSet("extra-tasks", updated);
-      }
-
-      function deleteExtra(id) {
-        const updated = extra.filter(ex => ex.id !== id);
-        setExtra(updated);
-        storageSet("extra-tasks", updated);
-      }
-
-      function addTask(newTask) {
-        const updated = [...tasks, { ...newTask, id: "t-" + Date.now(), lastDone: null }];
-        setTasks(updated);
-        storageSet("tasks-catalog", updated);
-      }
-
-      function deleteTask(id) {
-        const updated = tasks.filter(tk => tk.id !== id);
-        setTasks(updated);
-        storageSet("tasks-catalog", updated);
-      }
-
-      function updateStock(id, delta) {
-        const updated = inventory.map(item => item.id === id ? { ...item, stock: Math.max(0, item.stock + delta) } : item);
-        setInventory(updated);
-        storageSet("inventory-data", updated);
-      }
-
-      function addInventoryItem(item) {
-        const updated = [...inventory, { ...item, id: "i-" + Date.now() }];
-        setInventory(updated);
-        storageSet("inventory-data", updated);
-      }
-
-      function addLogEntry(text, copyToBacklog = false) {
-        if (!text.trim()) return;
-        const entry = { id: "l-" + Date.now(), date: today, time: new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }), text, author: "Vláďa / Владя" };
-        const updatedLog = [entry, ...log];
-        setLog(updatedLog);
-        storageSet("handover-log", updatedLog);
-
-        if (copyToBacklog) {
-          addTask({
-            name: { cz: "Závada: " + text.slice(0, 35) + "...", ua: "Несправність: " + text.slice(0, 35) + "..." },
-            category: "indoor",
-            priority: "high",
-            tag: "Revize",
-            interval: 1,
-            notes: { cz: text, ua: text },
-            months: [],
-            areas: [selectedAreaFilter === "all" ? "skola_mp" : selectedAreaFilter]
-          });
+      useEffect(() => {
+        if (weatherMode === "auto") {
+          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${TROJA_LAT}&longitude=${TROJA_LON}&current_weather=true`)
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.current_weather) {
+                const code = data.current_weather.weathercode;
+                const isRain = [51,53,55,61,63,65,80,81,82,95,96,97].includes(code);
+                setApiWeather({
+                  isRaining: isRain,
+                  temp: Math.round(data.current_weather.temperature),
+                  wind: Math.round(data.current_weather.windspeed)
+                });
+              }
+            }).catch(() => {});
         }
-      }
+      }, [weatherMode]);
 
-      function startShift(area) {
-        if (sessions.some(s => !s.end)) return;
-        const updated = [{ id: "s-" + Date.now(), date: today, start: new Date().toISOString(), end: null, area: area || "skola_mp" }, ...sessions];
-        setSessions(updated);
-        storageSet("work-sessions", updated);
-      }
+      const effectiveRaining = weatherMode === "rain" ? true : weatherMode === "dry" ? false : apiWeather.isRaining;
 
-      function endShift() {
-        const idx = sessions.findIndex(s => !s.end);
-        if (idx < 0) return;
-        const now = new Date().toISOString();
-        const s = sessions[idx];
-        const hours = Math.round(((new Date(now) - new Date(s.start)) / 3600000) * 100) / 100;
-        const rate = wageSettings.areaRates[s.area] || wageSettings.defaultRate;
-        const updated = sessions.map((x, i) => i === idx ? { ...x, end: now, hours, rate, wage: Math.round(hours * rate) } : x);
-        setSessions(updated);
-        storageSet("work-sessions", updated);
-      }
+      const addExtraCloud = async (title) => {
+        if (!title.trim()) return;
+        const { error } = await supabase.from('tasks').insert([
+          { title: title, status: 'Backlog', is_adhoc: true, priority: 'Normal' }
+        ]);
+        if (error) console.error("Chyba zápisu do Supabase:", error);
+      };
 
-      function deleteSession(id) {
-        const updated = sessions.filter(s => s.id !== id);
-        setSessions(updated);
-        storageSet("work-sessions", updated);
-      }
+      const toggleExtraCloud = async (id, currentStatus) => {
+        const nextStatus = currentStatus === 'Done' ? 'Backlog' : 'Done';
+        await supabase.from('tasks').update({ status: nextStatus }).eq('id', id);
+      };
+
+      const deleteExtraCloud = async (id) => {
+        await supabase.from('tasks').delete().eq('id', id);
+      };
+
+      const toggleTaskDone = (id) => {
+        setTasks(prev => prev.map(tk => {
+          if (tk.id === id) {
+            const isDoneToday = tk.lastDone === today;
+            return { ...tk, lastDone: isDoneToday ? null : today };
+          }
+          return tk;
+        }));
+      };
+
+      const addCatalogTask = (newTask) => {
+        setTasks(prev => [newTask, ...prev]);
+      };
+
+      const startShift = (areaId) => {
+        setActiveSession({ areaId, startTime: new Date().toISOString() });
+      };
+
+      const endShift = () => {
+        if (!activeSession) return;
+        const end = new Date();
+        const start = new Date(activeSession.startTime);
+        const durationHours = Math.max(0.05, ((end - start) / (1000 * 60 * 60))).toFixed(2);
+        const newSession = {
+          id: Date.now().toString(),
+          date: today,
+          areaId: activeSession.areaId,
+          hours: parseFloat(durationHours),
+          wage: Math.round(parseFloat(durationHours) * 250)
+        };
+        setWorkSessions([newSession, ...workSessions]);
+        setActiveSession(null);
+      };
 
       return e("div", { className: "min-h-screen bg-[#1B1E21] text-[#ECECEA] p-4 sm:p-8 font-sans w-full max-w-none" },
-        // HLAVIČKA A JAZYKOVÝ PŘEPÍNAČ
+        // HLAVIČKA A NÁSTROJE
         e("div", { className: "flex flex-wrap justify-between items-center gap-4 mb-4 border-b border-[#3A3F44] pb-4 w-full" },
           e("div", null,
             e("h1", { className: "text-2xl font-bold uppercase tracking-wide text-[#F2A93B]" }, t.title),
-            e("p", { className: "text-xs text-gray-400 capitalize mt-0.5" }, 
-              new Intl.DateTimeFormat(lang === "cz" ? "cs-CZ" : "uk-UA", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()) + 
-              ` | Troja API: ${apiWeather.temp}°C, ${apiWeather.wind} m/s`
-            )
+            e("p", { className: "text-xs text-emerald-400 mt-0.5" }, "● Cloud Supabase Realtime Aktivní")
           ),
-          
-          e("div", { className: "flex gap-2 items-center" },
-            // PŘEPÍNAČ JAZYKA
-            e("div", { className: "flex bg-[#24282C] p-1 rounded-xl border border-[#3A3F44] mr-2" },
-              e("button", {
-                onClick: () => changeLang("cz"),
-                className: `px-2.5 py-1 rounded-lg text-xs font-bold transition ${lang === "cz" ? "bg-[#F2A93B] text-black shadow" : "text-gray-400 hover:text-white"}`
-              }, "🇨🇿 CZ"),
-              e("button", {
-                onClick: () => changeLang("ua"),
-                className: `px-2.5 py-1 rounded-lg text-xs font-bold transition ${lang === "ua" ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"}`
-              }, "🇺🇦 UA")
+          e("div", { className: "flex gap-2 items-center flex-wrap" },
+            // PREPYNAC POCASI
+            e("div", { className: "flex bg-[#24282C] p-1 rounded-xl border border-[#3A3F44] text-xs font-semibold" },
+              e("button", { onClick: () => setWeatherMode("dry"), className: `px-3 py-1 rounded-lg ${weatherMode === "dry" ? "bg-amber-500 text-black font-bold" : "text-gray-400"}` }, t.dry),
+              e("button", { onClick: () => setWeatherMode("rain"), className: `px-3 py-1 rounded-lg ${weatherMode === "rain" ? "bg-blue-600 text-white font-bold" : "text-gray-400"}` }, t.rain),
+              e("button", { onClick: () => setWeatherMode("auto"), className: `px-3 py-1 rounded-lg ${weatherMode === "auto" ? "bg-emerald-600 text-white font-bold" : "text-gray-400"}` }, t.auto)
             ),
-
-            // WEATHER TOGGLE
+            // PŘEPÍNAČ JAZYKA
             e("div", { className: "flex bg-[#24282C] p-1 rounded-xl border border-[#3A3F44]" },
-              e("button", { onClick: () => setWeatherMode("dry"), className: `px-2.5 py-1 rounded-lg text-xs font-bold transition ${weatherMode === "dry" ? "bg-amber-500 text-black shadow" : "text-gray-400"}` }, t.dry),
-              e("button", { onClick: () => setWeatherMode("rain"), className: `px-2.5 py-1 rounded-lg text-xs font-bold transition ${weatherMode === "rain" ? "bg-blue-600 text-white shadow" : "text-gray-400"}` }, t.rain),
-              e("button", { onClick: () => setWeatherMode("auto"), className: `px-2.5 py-1 rounded-lg text-xs font-bold transition ${weatherMode === "auto" ? "bg-[#F2A93B] text-black shadow" : "text-gray-400"}` }, t.auto)
+              e("button", { onClick: () => setLang("cz"), className: `px-2.5 py-1 rounded-lg text-xs font-bold ${lang === "cz" ? "bg-[#F2A93B] text-black" : "text-gray-400"}` }, "🇨🇿 CZ"),
+              e("button", { onClick: () => setLang("ua"), className: `px-2.5 py-1 rounded-lg text-xs font-bold ${lang === "ua" ? "bg-blue-600 text-white" : "text-gray-400"}` }, "🇺🇦 UA")
             )
           )
         ),
 
-        // INFORMACE O POČASÍ
-        e("div", { className: `mb-4 p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between border w-full ${isRainingActive ? "bg-red-950/40 border-red-500/60 text-red-200" : "bg-emerald-950/40 border-emerald-500/60 text-emerald-200"}` },
-          e("span", null, isRainingActive ? t.rainActive : t.dryActive),
-          e("span", { className: "opacity-75 text-[11px]" }, weatherMode === "auto" ? t.sourceApi : t.sourceManual)
+        // STAV POČASÍ BANNER
+        e("div", { className: `p-3 rounded-xl border mb-6 flex items-center justify-between text-xs font-bold ${effectiveRaining ? "bg-blue-950/40 border-blue-500/50 text-blue-200" : "bg-amber-950/20 border-amber-500/40 text-amber-200"}` },
+          e("span", null, effectiveRaining ? t.rainActive : t.dryActive),
+          e("span", { className: "opacity-75 font-normal" }, `${weatherMode === "auto" ? t.sourceApi : t.sourceManual} (${apiWeather.temp}°C, ${apiWeather.wind} km/h)`)
         ),
 
-        apiWeather.temp < 18 && e("div", { className: "mb-4 p-3 rounded-xl bg-amber-950/50 border border-amber-500/50 text-amber-300 text-xs w-full" }, t.coldWarning),
-
-        // FILTR OBJEKTŮ
-        e("div", { className: "flex items-center gap-2 mb-6 overflow-x-auto pb-2 w-full" },
+        // FILTER OBJEKTŮ
+        e("div", { className: "flex gap-2 mb-6 overflow-x-auto pb-2 w-full" },
           e("button", {
             onClick: () => setSelectedAreaFilter("all"),
-            className: `px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${selectedAreaFilter === "all" ? "bg-[#F2A93B] text-black" : "bg-[#24282C] text-gray-400 border border-[#3A3F44]"}`
+            className: `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${selectedAreaFilter === "all" ? "bg-white text-black" : "bg-[#24282C] text-gray-400 border border-[#3A3F44]"}`
           }, t.allAreas),
           AREAS.map(a => e("button", {
             key: a.id,
             onClick: () => setSelectedAreaFilter(a.id),
-            className: `px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border transition`,
-            style: {
-              borderColor: a.color,
-              backgroundColor: selectedAreaFilter === a.id ? a.color : "#24282C",
-              color: selectedAreaFilter === a.id ? "#ffffff" : a.color
-            }
-          }, a.label[lang] || a.label.cz))
+            className: `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${selectedAreaFilter === a.id ? "text-black" : "bg-[#24282C] text-gray-300 border border-[#3A3F44]"}`,
+            style: selectedAreaFilter === a.id ? { backgroundColor: a.color } : {}
+          }, a.label[lang]))
         ),
 
-        // NAVIGAČNÍ TLAČÍTKA
+        // HLAVNÍ TAB NAVIGACE
         e("div", { className: "flex gap-1.5 mb-6 bg-[#24282C] p-1.5 rounded-2xl border border-[#3A3F44] overflow-x-auto w-full" },
           [
             { id: "dnes", label: t.tabDnes },
@@ -473,133 +387,69 @@
           ].map(tb => e("button", {
             key: tb.id,
             onClick: () => setTab(tb.id),
-            className: `flex-1 min-w-[120px] py-2.5 rounded-xl text-xs font-bold transition text-center whitespace-nowrap ${tab === tb.id ? "bg-[#F2A93B] text-black shadow-md" : "text-gray-400 hover:text-white"}`
+            className: `flex-1 min-w-[120px] py-2.5 rounded-xl text-xs font-bold transition text-center ${tab === tb.id ? "bg-[#F2A93B] text-black shadow-md" : "text-gray-400 hover:text-white"}`
           }, tb.label))
         ),
 
-        // SEKCE ZÁLOŽEK
-        tab === "dnes" && e(DnesTab, { dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask: toggleTask, onAddExtra: addExtra, onToggleExtra: toggleExtra, onDeleteExtra: deleteExtra, today, isOutdoorBlocked: isRainingActive, lang, t }),
-        tab === "harmonogram" && e(HarmonogramTab, { lang, t }),
-        tab === "objekty" && e(ObjektyTab, { selectedAreaFilter, lang, t }),
-        tab === "sklad" && e(SkladTab, { inventory, onUpdateStock: updateStock, onAddItem: addInventoryItem, selectedAreaFilter, lang, t }),
-        tab === "katalog" && e(KatalogTab, { tasks: filteredTasks, onAddTask: addTask, onDeleteTask: deleteTask, lang, t }),
-        tab === "protokol" && e(ProtokolTab, { log, onAddLog: addLogEntry, lang, t }),
-        tab === "vykaz" && e(VykazTab, { sessions, onStart: startShift, onEnd: endShift, onDelete: deleteSession, wageSettings, setWageSettings, lang, t })
+        // OBSAH JEDNOTLIVÝCH ZÁLOŽEK
+        tab === "dnes" && e(DnesTab, { 
+          tasks, 
+          onToggleTaskDone, 
+          extra, 
+          onAddExtra: addExtraCloud, 
+          onToggleExtra: toggleExtraCloud, 
+          onDeleteExtra: deleteExtraCloud, 
+          effectiveRaining, 
+          selectedAreaFilter, 
+          t, 
+          lang 
+        }),
+        
+        tab === "harmonogram" && e(HarmonogramTab, { t, lang, selectedAreaFilter }),
+        
+        tab === "objekty" && e(ObjektyTab, { t, lang, selectedAreaFilter }),
+        
+        tab === "sklad" && e(SkladTab, { inventory, setInventory, t, lang, selectedAreaFilter }),
+        
+        tab === "katalog" && e(KatalogTab, { tasks, onAddTask: addCatalogTask, t, lang }),
+        
+        tab === "vykaz" && e(VykazTab, { 
+          workSessions, 
+          activeSession, 
+          startShift, 
+          endShift, 
+          t, 
+          lang, 
+          selectedAreaFilter 
+        }),
+        
+        tab === "protokol" && e(ProtokolTab, { logs, setLogs, onAddExtraCloud, t, lang })
       );
     }
 
-    // ---------- TAB: HARMONOGRAM ----------
-    function HarmonogramTab({ lang, t }) {
-      const schedule = [
-        {
-          time: "07:00 – 08:30",
-          title: { cz: "Ranní blok: Start, Topení & Bezpečnost", ua: "Ранковий блок: Старт, опалення та безпека" },
-          areas: ["Škola Malého prince", "Školní prostor", "Byty"],
-          color: "#E67E22",
-          items: [
-            { cz: "Škola Malého prince & Školní pr.: Kontrola ranní teploty, zátop v jurtě/mobilheimu při chladu (<18°C).", ua: "Школа МП та Шкільний простір: Перевірка температури, розпалювання печі (<18°C)." },
-            { cz: "Odemknutí hlavních bran, vizuální kontrola příchodové trasy pro děti (sklo, polámané větve, náledí).", ua: "Відмикання воріт, огляд прибудинкової території для безпеки дітей." },
-            { cz: "Byty: Rychlá vizuální obchůzka vchodů a společných prostor při průchodu okruhem.", ua: "Квартири: Швидка перевірка під'їздів під час обходу." }
-          ]
-        },
-        {
-          time: "08:30 – 12:00",
-          title: { cz: "Dopolední blok: Dílny, Výuka & Operativní servis", ua: "Денний блок: Майстерня, навчання та обслуговування" },
-          areas: ["Škola Malého prince", "Školní prostor"],
-          color: "#2E8B7D",
-          items: [
-            { cz: "Dílna MP: Příprava dřevěných prken/přířezů na výuku, kontrola dlátek a nářadí.", ua: "Майстерня МП: Підготовка дерев'яних заготовок, перевірка інструментів." },
-            { cz: "Vedení hodin v Dílně Malého prince (projektová výuka, práce se dřevem a drátem).", ua: "Проведення занять у майстерні (робота з деревом та дротом)." },
-            { cz: "Řešení operativních požadavků učitelů (opravy židlí, uvolněné panty, drobné instalatérství).", ua: "Виконання поточних прохань вчителів (ремонт меблів, завісів)." }
-          ]
-        },
-        {
-          time: "12:00 – 14:30",
-          title: { cz: "Odpolední blok: Okruh Troja (Šafrán & Komunitní prostor)", ua: "Післяобідній блок: Обхід Троя (Шафран та Ком'юніті)" },
-          areas: ["Šafrán", "Komunitní prostor"],
-          color: "#8B5FBF",
-          items: [
-            { cz: "Šafrán (Základna): Údržba zahradní techniky (sekačky, křovinořezy), kontrola skladu, čištění lapačů tuku.", ua: "Шафран: Обслуговування газонокосарок, перевірка складу, очищення жировловлювачів." },
-            { cz: "Komunitní prostor: Kontrola větrání, údržba ohniště a laviček.", ua: "Ком'юніті простір: Перевірка вентиляції, догляд за вогнищем та лавками." }
-          ]
-        },
-        {
-          time: "14:30 – 16:00",
-          title: { cz: "Podvečerní blok: Uzávěrka, Sklad & Zápis", ua: "Вечірній блок: Завершення, склад та звіт" },
-          areas: ["Všechny trojské objekty"],
-          color: "#F2A93B",
-          items: [
-            { cz: "Úklid dílen, odprášení odsávání pilin, vypnutí hlavních vypínačů nářadí.", ua: "Прибирання майстерні, вимкнення головних вимикачів електроінструменту." },
-            { cz: "Kontrola uzavření oken a zamykání všech objektů trojského okruhu.", ua: "Перевірка закриття вікон та дверей на всіх об'єктах." },
-            { cz: "Zápis do Večerního protokolu (hlášení závad), kontrola skladu a stopnutí směny.", ua: "Запис у вечірній протокол, перевірка складу та завершення зміни." }
-          ]
-        }
-      ];
-
-      return e("div", { className: "space-y-4 w-full" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] mb-4 w-full" },
-          e("h2", { className: "text-base font-bold text-[#F2A93B] mb-1" }, t.schedTitle),
-          e("p", { className: "text-xs text-gray-400" }, t.schedDesc)
-        ),
-        schedule.map((item, idx) => e("div", { key: idx, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] relative overflow-hidden w-full" },
-          e("div", { className: "absolute top-0 left-0 w-2 h-full", style: { backgroundColor: item.color } }),
-          e("div", { className: "pl-2" },
-            e("div", { className: "flex justify-between items-center mb-2 flex-wrap gap-2" },
-              e("span", { className: "text-xs font-black uppercase px-2.5 py-1 rounded-lg bg-[#2E3338] border border-[#3A3F44] text-[#F2A93B]" }, item.time),
-              e("div", { className: "flex gap-1 flex-wrap" },
-                item.areas.map(a => e("span", { key: a, className: "text-[10px] px-2 py-0.5 rounded-full bg-[#3A3F44] text-gray-300 font-semibold" }, a))
-              )
-            ),
-            e("h3", { className: "text-sm font-bold text-white mb-2" }, item.title[lang] || item.title.cz),
-            e("ul", { className: "space-y-1 text-xs text-gray-300" },
-              item.items.map((it, i) => e("li", { key: i, className: "flex items-start gap-1.5" },
-                e("span", { className: "text-gray-500" }, "•"),
-                e("span", null, it[lang] || it.cz)
-              ))
-            )
-          )
-        ))
-      );
-    }
-
-    // ---------- TAB: DNES ----------
-    function DnesTab({ dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask, onAddExtra, onToggleExtra, onDeleteExtra, today, isOutdoorBlocked, lang, t }) {
+    // ZÁLOŽKA 1: DNES A ÚKOLY
+    function DnesTab({ tasks, onToggleTaskDone, extra, onAddExtra, onToggleExtra, onDeleteExtra, effectiveRaining, selectedAreaFilter, t, lang }) {
       const [text, setText] = useState("");
+      const today = todayStr();
+
+      const filteredTasks = tasks.filter(tk => {
+        if (selectedAreaFilter !== "all" && !tk.areas.includes(selectedAreaFilter)) return false;
+        return true;
+      });
+
       return e("div", { className: "space-y-6 w-full" },
-        outdoorBlocked.length > 0 && e("div", { className: "p-4 rounded-xl bg-red-900/40 border border-red-500/60 text-red-200 w-full" },
-          e("p", { className: "font-bold text-sm mb-1" }, `${t.skippedRain} (${outdoorBlocked.length})`),
-          outdoorBlocked.map(tk => {
-            const name = typeof tk.name === "object" ? (tk.name[lang] || tk.name.cz) : tk.name;
-            const sub = typeof tk.substitute === "object" ? (tk.substitute[lang] || tk.substitute.cz) : tk.substitute;
-            return e("div", { key: tk.id, className: "mb-2 text-xs border-b border-red-500/30 pb-2 last:border-0" },
-              e("p", { className: "font-semibold line-through text-red-300" }, `• ${name}`),
-              sub ? e("p", { className: "text-amber-300 font-bold mt-0.5 ml-3" }, `${t.substituteLabel} ${sub}`) : e("p", { className: "text-gray-400 italic mt-0.5 ml-3" }, t.noSubstitute)
-            );
-          })
-        ),
-
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `${t.indoorTasks} (${dueIndoor.length})`),
-          dueIndoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, t.noTasks) :
-          dueIndoor.map(tk => e(TaskCard, { key: tk.id, task: tk, onToggle: onToggleTask, today, lang }))
-        ),
-
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, `${t.outdoorTasks} (${dueOutdoor.length})`),
-          dueOutdoor.length === 0 ? e("p", { className: "text-sm text-gray-500 italic" }, t.noTasks) :
-          dueOutdoor.map(tk => e(TaskCard, { key: tk.id, task: tk, onToggle: onToggleTask, today, lang }))
-        ),
-
+        // CLOUD MIMOŘÁDNÉ ÚKOLY
         e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
           e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, t.extraTasks),
+          extra.length === 0 ? e("p", { className: "text-xs text-gray-500 italic mb-4" }, "Žádné mimořádné úkoly v cloudu.") :
           extra.map(ex => e("div", { key: ex.id, className: "flex items-center justify-between p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
-            e("div", { className: "flex items-center gap-3 cursor-pointer", onClick: () => onToggleExtra(ex.id) },
-              e("span", { className: "text-lg" }, ex.done ? "✅" : "⚪"),
-              e("span", { className: `text-sm ${ex.done ? "line-through text-gray-500" : "text-gray-200"}` }, ex.name)
+            e("div", { className: "flex items-center gap-3 cursor-pointer", onClick: () => onToggleExtra(ex.id, ex.status) },
+              e("span", { className: "text-lg" }, ex.status === 'Done' ? "✅" : "⚪"),
+              e("span", { className: `text-sm ${ex.status === 'Done' ? "line-through text-gray-500" : "text-gray-200"}` }, ex.name[lang] || ex.name.cz)
             ),
             e("button", { onClick: () => onDeleteExtra(ex.id), className: "text-gray-500 hover:text-red-400 text-xs px-2" }, t.delete)
           )),
-          e("div", { className: "flex gap-2 mt-3" },
+          e("div", { className: "flex gap-2 mt-4" },
             e("input", {
               value: text,
               onChange: e => setText(e.target.value),
@@ -609,277 +459,296 @@
             }),
             e("button", { onClick: () => { onAddExtra(text); setText(""); }, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, t.add)
           )
+        ),
+
+        // SYSTEMOVÉ ÚKOLY
+        e("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4 w-full" },
+          // VNITŘNÍ ÚKOLY
+          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+            e("h3", { className: "text-xs font-bold uppercase text-emerald-400 mb-3" }, t.indoorTasks),
+            filteredTasks.filter(k => k.category === "indoor").map(tk => {
+              const isDone = tk.lastDone === today;
+              return e("div", { key: tk.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] flex items-start gap-3 cursor-pointer", onClick: () => onToggleTaskDone(tk.id) },
+                e("span", { className: "text-lg mt-0.5" }, isDone ? "✅" : "⚪"),
+                e("div", null,
+                  e("div", { className: `font-bold text-sm ${isDone ? "line-through text-gray-500" : "text-white"}` }, tk.name[lang]),
+                  e("div", { className: "text-xs text-gray-400 mt-0.5" }, tk.notes[lang])
+                )
+              );
+            })
+          ),
+          // VENKOVNI ÚKOLY
+          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+            e("h3", { className: "text-xs font-bold uppercase text-amber-400 mb-3" }, t.outdoorTasks),
+            filteredTasks.filter(k => k.category === "outdoor").map(tk => {
+              const isDone = tk.lastDone === today;
+              return e("div", { key: tk.id, className: `p-3 mb-2 rounded-xl border ${effectiveRaining ? "bg-red-950/20 border-red-500/30 opacity-85" : "bg-[#2E3338] border-[#3A3F44]"}` },
+                e("div", { className: "flex items-start gap-3 cursor-pointer", onClick: () => onToggleTaskDone(tk.id) },
+                  e("span", { className: "text-lg mt-0.5" }, isDone ? "✅" : "⚪"),
+                  e("div", null,
+                    e("div", { className: `font-bold text-sm ${isDone ? "line-through text-gray-500" : "text-white"}` }, tk.name[lang]),
+                    e("div", { className: "text-xs text-gray-400 mt-0.5" }, tk.notes[lang])
+                  )
+                ),
+                effectiveRaining && tk.substitute && e("div", { className: "text-xs text-amber-300 mt-2 p-2 bg-amber-950/40 rounded-lg border border-amber-500/30 ml-7" },
+                  `${t.substituteLabel} ${tk.substitute[lang]}`
+                )
+              );
+            })
+          )
         )
       );
     }
 
-    function TaskCard({ task, onToggle, today, lang }) {
-      const isDone = task.lastDone === today;
-      const isCritical = task.priority === "critical";
-      const name = typeof task.name === "object" ? (task.name[lang] || task.name.cz) : task.name;
-      const notes = typeof task.notes === "object" ? (task.notes[lang] || task.notes.cz) : task.notes;
-
-      return e("div", {
-        onClick: () => onToggle(task.id),
-        className: `flex items-start justify-between p-3 mb-2 rounded-xl border cursor-pointer transition w-full ${isCritical ? "bg-red-950/30 border-red-500/80 hover:border-red-400" : "bg-[#2E3338] border-[#3A3F44] hover:border-gray-500"}`
-      },
-        e("div", { className: "flex items-start gap-3" },
-          e("span", { className: "text-lg mt-0.5" }, isDone ? "✅" : "⚪"),
-          e("div", null,
-            e("div", { className: "flex items-center gap-2 flex-wrap" },
-              e("p", { className: `text-sm font-semibold ${isDone ? "line-through text-gray-500" : "text-gray-100"}` }, name),
-              isCritical && e("span", { className: "bg-red-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded" }, "Kritická"),
-              task.tag && e("span", { className: "bg-gray-700 text-gray-300 text-[10px] px-2 py-0.5 rounded-full" }, task.tag)
-            ),
-            notes && e("p", { className: "text-xs text-gray-400 mt-1" }, notes)
-          )
-        ),
-        e("div", { className: "flex gap-1 flex-wrap justify-end" },
-          (task.areas || []).map(aId => {
-            const area = AREAS.find(a => a.id === aId);
-            return area ? e("span", { key: aId, className: "text-[10px] px-2 py-0.5 rounded-full font-bold", style: { backgroundColor: area.color + "22", color: area.color, border: `1px solid ${area.color}55` } }, area.label[lang] || area.label.cz) : null;
+    // ZÁLOŽKA 2: HARMONOGRAM
+    function HarmonogramTab({ t, lang, selectedAreaFilter }) {
+      const filtered = MASTER_SCHEDULE.filter(s => selectedAreaFilter === "all" || s.areaId === selectedAreaFilter);
+      return e("div", { className: "space-y-4 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h2", { className: "text-sm font-bold text-[#F2A93B] uppercase" }, t.schedTitle),
+          e("p", { className: "text-xs text-gray-400 mt-1 mb-4" }, t.schedDesc),
+          filtered.map(item => {
+            const area = AREAS.find(a => a.id === item.areaId);
+            return e("div", { key: item.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] flex flex-col md:flex-row gap-3 md:items-center justify-between" },
+              e("div", { className: "flex items-center gap-3" },
+                e("span", { className: "px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[#1B1E21] text-[#F2A93B] border border-[#3A3F44]" }, item.time),
+                e("div", null,
+                  e("div", { className: "text-sm font-bold text-white" }, item.title[lang]),
+                  e("div", { className: "text-xs text-gray-400" }, item.desc[lang])
+                )
+              ),
+              area && e("span", { className: "px-2.5 py-1 rounded-lg text-xs font-bold text-black self-start md:self-center", style: { backgroundColor: area.color } }, area.label[lang])
+            );
           })
         )
       );
     }
 
-    function ObjektyTab({ selectedAreaFilter, lang, t }) {
-      const targetAreas = selectedAreaFilter === "all" ? AREAS : AREAS.filter(a => a.id === selectedAreaFilter);
-
-      return e("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full" },
-        targetAreas.map(a => e("div", { key: a.id, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] flex flex-col justify-between" },
-          e("div", null,
-            e("div", { className: "flex items-center gap-2 mb-3" },
-              e("div", { className: "w-3.5 h-3.5 rounded-full", style: { backgroundColor: a.color } }),
-              e("h2", { className: "text-base font-bold text-white" }, a.label[lang] || a.label.cz)
+    // ZÁLOŽKA 3: OBJEKTY A PASPORT
+    function ObjektyTab({ t, lang, selectedAreaFilter }) {
+      const filtered = AREAS.filter(a => selectedAreaFilter === "all" || a.id === selectedAreaFilter);
+      return e("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4 w-full" },
+        filtered.map(area => e("div", { key: area.id, className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("div", { className: "flex items-center justify-between mb-3" },
+            e("h3", { className: "font-bold text-base text-white" }, area.label[lang]),
+            e("span", { className: "w-3 h-3 rounded-full", style: { backgroundColor: area.color } })
+          ),
+          e("div", { className: "space-y-2 text-xs" },
+            e("div", { className: "p-2.5 rounded-lg bg-[#2E3338] border border-[#3A3F44]" },
+              e("span", { className: "font-bold text-amber-400 block mb-0.5" }, t.keys),
+              e("span", { className: "text-gray-300" }, area.keys)
             ),
-            e("div", { className: "space-y-2 text-xs" },
-              e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-                e("p", { className: "font-bold text-[#F2A93B] mb-0.5" }, t.keys),
-                e("p", { className: "text-gray-300" }, a.keys)
-              ),
-              e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-                e("p", { className: "font-bold text-blue-400 mb-0.5" }, t.shutoffs),
-                e("p", { className: "text-gray-300" }, a.shutoffs)
-              ),
-              e("div", { className: "p-2.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-                e("p", { className: "font-bold text-red-400 mb-0.5" }, t.emergency),
-                e("p", { className: "text-gray-300" }, a.emergency)
-              )
+            e("div", { className: "p-2.5 rounded-lg bg-[#2E3338] border border-[#3A3F44]" },
+              e("span", { className: "font-bold text-blue-400 block mb-0.5" }, t.shutoffs),
+              e("span", { className: "text-gray-300" }, area.shutoffs)
+            ),
+            e("div", { className: "p-2.5 rounded-lg bg-[#2E3338] border border-[#3A3F44]" },
+              e("span", { className: "font-bold text-red-400 block mb-0.5" }, t.emergency),
+              e("span", { className: "text-gray-300" }, area.emergency)
             )
           )
         ))
       );
     }
 
-    function SkladTab({ inventory, onUpdateStock, onAddItem, selectedAreaFilter, lang, t }) {
+    // ZÁLOŽKA 4: SKLAD A MATERIÁL
+    function SkladTab({ inventory, setInventory, t, lang, selectedAreaFilter }) {
       const [name, setName] = useState("");
-      const [area, setArea] = useState("skola_mp");
-      const [stock, setStock] = useState(1);
-      const [minStock, setMinStock] = useState(1);
+      const [qty, setQty] = useState("");
       const [unit, setUnit] = useState("ks");
 
-      const items = selectedAreaFilter === "all" ? inventory : inventory.filter(i => i.area === selectedAreaFilter);
+      const filtered = inventory.filter(i => selectedAreaFilter === "all" || i.area === selectedAreaFilter);
+
+      const addInv = () => {
+        if (!name.trim() || !qty) return;
+        const item = {
+          id: Date.now().toString(),
+          name: { cz: name, ua: name },
+          qty: parseFloat(qty),
+          min: 2,
+          unit,
+          area: selectedAreaFilter === "all" ? "safran" : selectedAreaFilter
+        };
+        setInventory([...inventory, item]);
+        setName("");
+        setQty("");
+      };
 
       return e("div", { className: "space-y-6 w-full" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3 uppercase tracking-wider" }, t.addInventory),
-          e("div", { className: "space-y-3" },
-            e("input", { value: name, onChange: e => setName(e.target.value), placeholder: t.itemPlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
-            e("div", { className: "flex gap-2" },
-              e("select", { value: area, onChange: e => setArea(e.target.value), className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
-                AREAS.map(a => e("option", { key: a.id, value: a.id }, a.label[lang] || a.label.cz))
-              ),
-              e("input", { value: unit, onChange: e => setUnit(e.target.value), placeholder: t.unitPlaceholder, className: "w-28 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" })
-            ),
-            e("div", { className: "flex gap-2" },
-              e("input", { type: "number", value: stock, onChange: e => setStock(Number(e.target.value)), placeholder: "Stav", className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
-              e("input", { type: "number", value: minStock, onChange: e => setMinStock(Number(e.target.value)), placeholder: "Min. stav", className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" })
-            ),
-            e("button", {
-              onClick: () => {
-                if (name.trim()) {
-                  onAddItem({ name: { cz: name, ua: name }, area, stock, minStock, unit });
-                  setName("");
-                }
-              },
-              className: "w-full py-2.5 rounded-xl bg-[#F2A93B] text-black font-bold text-sm mt-2"
-            }, t.add)
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-[#F2A93B] mb-3" }, t.addInventory),
+          e("div", { className: "flex flex-wrap gap-2" },
+            e("input", { value: name, onChange: e => setName(e.target.value), placeholder: t.itemPlaceholder, className: "flex-1 min-w-[200px] px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("input", { value: qty, type: "number", onChange: e => setQty(e.target.value), placeholder: "Počet", className: "w-24 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("input", { value: unit, onChange: e => setUnit(e.target.value), placeholder: t.unitPlaceholder, className: "w-24 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("button", { onClick: addInv, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, t.add)
           )
         ),
-
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `${t.stockState} (${items.length})`),
-          items.map(item => {
-            const isLow = item.stock < item.minStock;
-            const itemArea = AREAS.find(a => a.id === item.area);
-            const itemName = typeof item.name === "object" ? (item.name[lang] || item.name.cz) : item.name;
-            return e("div", { key: item.id, className: `flex justify-between items-center p-3 mb-2 rounded-xl border ${isLow ? "bg-red-950/40 border-red-500/80" : "bg-[#2E3338] border-[#3A3F44]"}` },
-              e("div", null,
-                e("p", { className: "text-sm font-semibold text-gray-100" }, itemName),
-                e("p", { className: "text-xs text-gray-400 mt-0.5" }, 
-                  `${itemArea ? (itemArea.label[lang] || itemArea.label.cz) : item.area} | Min: ${item.minStock} ${item.unit}`
-                ),
-                isLow && e("p", { className: "text-[11px] text-red-400 font-bold mt-1" }, t.needBuy)
-              ),
-              e("div", { className: "flex items-center gap-2" },
-                e("button", { onClick: () => onUpdateStock(item.id, -1), className: "w-8 h-8 bg-[#3A3F44] text-white rounded-lg font-bold" }, "-"),
-                e("span", { className: "text-sm font-bold min-w-[40px] text-center" }, `${item.stock} ${item.unit}`),
-                e("button", { onClick: () => onUpdateStock(item.id, 1), className: "w-8 h-8 bg-[#3A3F44] text-white rounded-lg font-bold" }, "+")
-              )
-            );
-          })
-        )
-      );
-    }
-
-    function KatalogTab({ tasks, onAddTask, onDeleteTask, lang, t }) {
-      const [name, setName] = useState("");
-      const [cat, setCat] = useState("indoor");
-      const [priority, setPriority] = useState("medium");
-      const [tag, setTag] = useState("Revize");
-      const [interval, setInterval] = useState(7);
-      const [notes, setNotes] = useState("");
-      const [substitute, setSubstitute] = useState("");
-      const [selectedAreas, setSelectedAreas] = useState(["skola_mp"]);
-
-      return e("div", { className: "space-y-6 w-full" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h3", { className: "text-sm font-bold text-[#F2A93B] mb-3 uppercase tracking-wider" }, t.addTaskCatalog),
-          e("div", { className: "space-y-3" },
-            e("input", { value: name, onChange: e => setName(e.target.value), placeholder: t.taskNamePlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
-            e("div", { className: "flex gap-2 flex-wrap" },
-              e("select", { value: cat, onChange: e => setCat(e.target.value), className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
-                e("option", { value: "indoor" }, "Vnitřní / Критий"),
-                e("option", { value: "outdoor" }, "Venkovní / Зовнішній")
-              ),
-              e("select", { value: priority, onChange: e => setPriority(e.target.value), className: "flex-1 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
-                e("option", { value: "low" }, "Nízká priority"),
-                e("option", { value: "medium" }, "Střední priority"),
-                e("option", { value: "high" }, "Vysoká priority"),
-                e("option", { value: "critical" }, "🔴 Havarijní / Аварійна")
-              )
-            ),
-            e("input", { type: "number", value: interval, onChange: e => setInterval(Number(e.target.value)), placeholder: t.intervalPlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
-            cat === "outdoor" && e("input", { value: substitute, onChange: e => setSubstitute(e.target.value), placeholder: t.substitutePlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-amber-300 outline-none" }),
-            e("input", { value: notes, onChange: e => setNotes(e.target.value), placeholder: t.notesPlaceholder, className: "w-full px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
-            e("button", {
-              onClick: () => {
-                if (name.trim()) {
-                  onAddTask({ name: { cz: name, ua: name }, category: cat, priority, tag, interval, notes: { cz: notes, ua: notes }, substitute: { cz: substitute, ua: substitute }, months: [], areas: selectedAreas });
-                  setName(""); setNotes(""); setSubstitute("");
-                }
-              },
-              className: "w-full py-2.5 rounded-xl bg-[#F2A93B] text-black font-bold text-sm mt-2"
-            }, t.saveCatalog)
-          )
-        ),
-
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, `${t.catalogTitle} (${tasks.length})`),
-          tasks.map(tk => {
-            const taskName = typeof tk.name === "object" ? (tk.name[lang] || tk.name.cz) : tk.name;
-            return e("div", { key: tk.id, className: "flex justify-between items-start p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
-              e("div", null,
-                e("p", { className: "text-sm font-semibold text-gray-100" }, taskName),
-                e("p", { className: "text-xs text-gray-400 mt-0.5" }, `Interval: ${tk.interval} d`)
-              ),
-              e("button", { onClick: () => onDeleteTask(tk.id), className: "text-gray-500 hover:text-red-400 text-xs px-2 py-1" }, t.delete)
-            );
-          })
-        )
-      );
-    }
-
-    function ProtokolTab({ log, onAddLog, lang, t }) {
-      const [text, setText] = useState("");
-      return e("div", { className: "space-y-6 w-full" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-2" }, t.logTitle),
-          e("textarea", {
-            value: text,
-            onChange: e => setText(e.target.value),
-            placeholder: t.logPlaceholder,
-            className: "w-full p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none h-28 mb-3"
-          }),
-          e("div", { className: "flex gap-2" },
-            e("button", { onClick: () => { onAddLog(text, false); setText(""); }, className: "flex-1 py-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-gray-200 font-bold text-xs" }, t.saveLog),
-            e("button", { onClick: () => { onAddLog(text, true); setText(""); }, className: "flex-1 py-2.5 rounded-xl bg-[#F2A93B] text-black font-bold text-xs" }, t.saveLogBacklog)
-          )
-        ),
-
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-3" }, t.logHistory),
-          log.map(l => e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
-            e("div", { className: "flex justify-between text-xs text-gray-400 mb-1" },
-              e("span", { className: "font-bold text-[#F2A93B]" }, l.author),
-              e("span", null, `${l.date} ${l.time}`)
-            ),
-            e("p", { className: "text-sm text-gray-200 whitespace-pre-line" }, l.text)
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-gray-400 mb-3" }, t.stockState),
+          filtered.map(item => e("div", { key: item.id, className: "flex items-center justify-between p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("span", { className: "text-sm text-white font-medium" }, item.name[lang]),
+            e("div", { className: "flex items-center gap-3" },
+              item.qty <= item.min && e("span", { className: "text-xs text-red-400 font-bold" }, t.needBuy),
+              e("span", { className: "text-sm font-bold font-mono text-[#F2A93B]" }, `${item.qty} ${item.unit}`)
+            )
           ))
         )
       );
     }
 
-    function VykazTab({ sessions, onStart, onEnd, onDelete, wageSettings, lang, t }) {
-      const [selectedArea, setSelectedArea] = useState("skola_mp");
-      const active = sessions.find(s => !s.end);
+    // ZÁLOŽKA 5: KATALOG SYSTÉMOVÝCH ÚKOLŮ
+    function KatalogTab({ tasks, onAddTask, t, lang }) {
+      const [name, setName] = useState("");
+      const [interval, setInterval] = useState("7");
+      const [category, setCategory] = useState("indoor");
+      const [notes, setNotes] = useState("");
+      const [substitute, setSubstitute] = useState("");
 
-      const breakdownByArea = useMemo(() => {
-        const result = {};
-        AREAS.forEach(a => { result[a.id] = { hours: 0, wage: 0, label: a.label[lang] || a.label.cz, color: a.color }; });
-        sessions.forEach(s => {
-          if (s.end && s.area && result[s.area]) {
-            result[s.area].hours += (s.hours || 0);
-            result[s.area].wage += (s.wage || 0);
-          }
-        });
-        return result;
-      }, [sessions, lang]);
-
-      const totalWage = sessions.reduce((acc, s) => acc + (s.wage || 0), 0);
-      const totalHours = Math.round(sessions.reduce((acc, s) => acc + (s.hours || 0), 0) * 100) / 100;
+      const handleSave = () => {
+        if (!name.trim()) return;
+        const newTask = {
+          id: Date.now().toString(),
+          name: { cz: name, ua: name },
+          role: "udrzba",
+          category,
+          priority: "medium",
+          tag: "Všeobecné",
+          areas: ["safran"],
+          months: [],
+          interval: parseInt(interval) || 7,
+          notes: { cz: notes, ua: notes },
+          substitute: substitute.trim() ? { cz: substitute, ua: substitute } : null,
+          lastDone: null
+        };
+        onAddTask(newTask);
+        setName("");
+        setNotes("");
+        setSubstitute("");
+      };
 
       return e("div", { className: "space-y-6 w-full" },
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center w-full" },
-          active ? e("div", { className: "space-y-3" },
-            e("p", { className: "text-sm text-green-400 font-bold" }, `${t.shiftRunning} (${new Date(active.start).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })})`),
-            e("button", { onClick: onEnd, className: "w-full py-3 rounded-xl bg-red-500 text-white font-bold text-sm shadow-lg" }, t.endShift)
-          ) : e("div", { className: "space-y-3" },
-            e("p", { className: "text-xs font-bold text-gray-400 uppercase" }, t.selectObject),
-            e("select", { value: selectedArea, onChange: e => setSelectedArea(e.target.value), className: "w-full p-2.5 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
-              AREAS.map(a => e("option", { key: a.id, value: a.id }, a.label[lang] || a.label.cz))
-            ),
-            e("button", { onClick: () => onStart(selectedArea), className: "w-full py-3 rounded-xl bg-[#F2A93B] text-black font-bold text-sm shadow-lg" }, t.startShift)
-          )
-        ),
-
-        e("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 w-full" },
-          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
-            e("p", { className: "text-xs text-gray-400 uppercase font-bold" }, t.totalWorked),
-            e("p", { className: "text-2xl font-bold text-[#F2A93B] mt-1" }, `${totalHours} h`)
-          ),
-          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] text-center" },
-            e("p", { className: "text-xs text-gray-400 uppercase font-bold" }, t.totalWage),
-            e("p", { className: "text-2xl font-bold text-green-400 mt-1" }, `${totalWage} Kč`)
-          )
-        ),
-
-        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44] w-full" },
-          e("h2", { className: "text-xs font-bold uppercase tracking-wider text-[#F2A93B] mb-3" }, t.monthlyClosure),
-          Object.keys(breakdownByArea).map(areaId => {
-            const item = breakdownByArea[areaId];
-            return e("div", { key: areaId, className: "flex justify-between items-center p-2.5 mb-1.5 bg-[#2E3338] rounded-xl border border-[#3A3F44]" },
-              e("div", { className: "flex items-center gap-2" },
-                e("div", { className: "w-3 h-3 rounded-full", style: { backgroundColor: item.color } }),
-                e("span", { className: "text-xs font-semibold text-gray-200" }, item.label)
-              ),
-              e("div", { className: "text-right text-xs" },
-                e("span", { className: "text-gray-400 mr-3" }, `${Math.round(item.hours * 10) / 10} h`),
-                e("span", { className: "font-bold text-green-400" }, `${item.wage} Kč`)
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-[#F2A93B] mb-3" }, t.addTaskCatalog),
+          e("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-3 mb-3" },
+            e("input", { value: name, onChange: e => setName(e.target.value), placeholder: t.taskNamePlaceholder, className: "px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("div", { className: "flex gap-2" },
+              e("input", { value: interval, type: "number", onChange: e => setInterval(e.target.value), placeholder: t.intervalPlaceholder, className: "w-1/2 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+              e("select", { value: category, onChange: e => setCategory(e.target.value), className: "w-1/2 px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
+                e("option", { value: "indoor" }, "Vnitřní"),
+                e("option", { value: "outdoor" }, "Venkovní")
               )
-            );
-          })
+            ),
+            e("input", { value: notes, onChange: e => setNotes(e.target.value), placeholder: t.notesPlaceholder, className: "px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" }),
+            e("input", { value: substitute, onChange: e => setSubstitute(e.target.value), placeholder: t.substitutePlaceholder, className: "px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" })
+          ),
+          e("button", { onClick: handleSave, className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, t.saveCatalog)
+        ),
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-gray-400 mb-3" }, t.catalogTitle),
+          tasks.map(tk => e("div", { key: tk.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] flex justify-between items-center" },
+            e("div", null,
+              e("div", { className: "text-sm font-bold text-white" }, tk.name[lang]),
+              e("div", { className: "text-xs text-gray-400" }, `${tk.category === 'indoor' ? '🏠 Vnitřní' : '🌳 Venkovní'} • Interval: ${tk.interval} dní`)
+            ),
+            e("span", { className: "px-2 py-1 bg-[#1B1E21] border border-[#3A3F44] rounded-lg text-xs font-mono text-amber-400" }, tk.priority)
+          ))
+        )
+      );
+    }
+
+    // ZÁLOŽKA 6: VÝKAZ A UZÁVĚRKA
+    function VykazTab({ workSessions, activeSession, startShift, endShift, t, lang, selectedAreaFilter }) {
+      const [selectedArea, setSelectedArea] = useState(AREAS[0].id);
+
+      const filteredSessions = workSessions.filter(s => selectedAreaFilter === "all" || s.areaId === selectedAreaFilter);
+      const totalHours = filteredSessions.reduce((acc, s) => acc + s.hours, 0);
+      const totalPay = filteredSessions.reduce((acc, s) => acc + s.wage, 0);
+
+      return e("div", { className: "space-y-6 w-full" },
+        // MĚŘENÍ ČASU
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          activeSession ? e("div", { className: "flex items-center justify-between" },
+            e("div", null,
+              e("span", { className: "text-xs text-emerald-400 font-bold block" }, t.shiftRunning),
+              e("span", { className: "text-sm font-bold text-white" }, AREAS.find(a => a.id === activeSession.areaId)?.label[lang])
+            ),
+            e("button", { onClick: endShift, className: "px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-sm" }, t.endShift)
+          ) : e("div", { className: "flex flex-wrap items-center gap-3" },
+            e("span", { className: "text-xs text-gray-300 font-bold" }, t.selectObject),
+            e("select", { value: selectedArea, onChange: e => setSelectedArea(e.target.value), className: "px-3 py-2 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none" },
+              AREAS.map(a => e("option", { key: a.id, value: a.id }, a.label[lang]))
+            ),
+            e("button", { onClick: () => startShift(selectedArea), className: "px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm" }, t.startShift)
+          )
+        ),
+
+        // SOUHRN
+        e("div", { className: "grid grid-cols-2 gap-4" },
+          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+            e("span", { className: "text-xs text-gray-400 block" }, t.totalWorked),
+            e("span", { className: "text-xl font-bold font-mono text-[#F2A93B]" }, `${totalHours.toFixed(2)} hod`)
+          ),
+          e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+            e("span", { className: "text-xs text-gray-400 block" }, t.totalWage),
+            e("span", { className: "text-xl font-bold font-mono text-emerald-400" }, `${totalPay} Kč`)
+          )
+        ),
+
+        // HISTORIE SMĚN
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-gray-400 mb-3" }, t.shiftHistory),
+          filteredSessions.length === 0 ? e("p", { className: "text-xs text-gray-500 italic" }, t.noSessions) :
+          filteredSessions.map(s => e("div", { key: s.id, className: "flex items-center justify-between p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("div", null,
+              e("span", { className: "text-xs text-gray-400 block" }, s.date),
+              e("span", { className: "text-sm font-bold text-white" }, AREAS.find(a => a.id === s.areaId)?.label[lang])
+            ),
+            e("div", { className: "text-right" },
+              e("span", { className: "text-sm font-mono text-amber-400 block" }, `${s.hours} hod`),
+              e("span", { className: "text-xs font-mono text-emerald-400" }, `${s.wage} Kč`)
+            )
+          ))
+        )
+      );
+    }
+
+    // ZÁLOŽKA 7: PROTOKOL / HLÁŠENÍ
+    function ProtokolTab({ logs, setLogs, onAddExtraCloud, t, lang }) {
+      const [text, setText] = useState("");
+
+      const addLog = (toBacklog = false) => {
+        if (!text.trim()) return;
+        const newLog = { id: Date.now().toString(), date: todayStr(), text };
+        setLogs([newLog, ...logs]);
+        
+        if (toBacklog && onAddExtraCloud) {
+          onAddExtraCloud(`[ZÁVADA] ${text}`);
+        }
+        setText("");
+      };
+
+      return e("div", { className: "space-y-6 w-full" },
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-[#F2A93B] mb-3" }, t.logTitle),
+          e("textarea", {
+            value: text,
+            onChange: e => setText(e.target.value),
+            placeholder: t.logPlaceholder,
+            className: "w-full p-3 rounded-xl bg-[#2E3338] border border-[#3A3F44] text-sm text-white outline-none h-24 mb-3"
+          }),
+          e("div", { className: "flex gap-2" },
+            e("button", { onClick: () => addLog(false), className: "px-4 py-2 rounded-xl bg-[#F2A93B] text-black font-bold text-sm" }, t.saveLog),
+            e("button", { onClick: () => addLog(true), className: "px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-sm" }, t.saveLogBacklog)
+          )
+        ),
+        e("div", { className: "bg-[#24282C] p-4 rounded-2xl border border-[#3A3F44]" },
+          e("h3", { className: "text-xs font-bold uppercase text-gray-400 mb-3" }, t.logHistory),
+          logs.length === 0 ? e("p", { className: "text-xs text-gray-500 italic" }, "Zatím žádná hlášení.") :
+          logs.map(l => e("div", { key: l.id, className: "p-3 mb-2 rounded-xl bg-[#2E3338] border border-[#3A3F44]" },
+            e("span", { className: "text-xs text-[#F2A93B] font-mono block mb-1" }, l.date),
+            e("p", { className: "text-sm text-gray-200" }, l.text)
+          ))
         )
       );
     }
