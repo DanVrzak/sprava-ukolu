@@ -38,6 +38,8 @@
         tabKatalog: "Katalog",
         tabVykaz: "Výkaz & Uzávěrka",
         tabProtokol: "Protokol",
+        schedTitle: "Doporučený denní časový harmonogram",
+        schedDesc: "Orientační časový rámec pro zajištění provozu všech objektů trojského okruhu.",
         skippedRain: "🛑 Přeskočeno / Odloženo kvůli počasí",
         substituteLabel: "➔ Náhradní činnost:",
         noSubstitute: "➔ Bez definované náhradní činnosti (přeskočit)",
@@ -96,6 +98,8 @@
         tabKatalog: "Каталог",
         tabVykaz: "Звіт та розрахунок",
         tabProtokol: "Протокол",
+        schedTitle: "Рекомендований денний розклад",
+        schedDesc: "Орієнтовний часовий графік для забезпечення роботи всіх об'єктів.",
         skippedRain: "🛑 Пропущено / Відкладено через погоду",
         substituteLabel: "➔ Альтернативне завдання:",
         noSubstitute: "➔ Без альтернативного завдання (пропустити)",
@@ -473,7 +477,7 @@
           }, tb.label))
         ),
 
-        // SECKCE ZÁLOŽEK
+        // SEKCE ZÁLOŽEK
         tab === "dnes" && e(DnesTab, { dueIndoor, dueOutdoor, outdoorBlocked, extra, onToggleTask: toggleTask, onAddExtra: addExtra, onToggleExtra: toggleExtra, onDeleteExtra: deleteExtra, today, isOutdoorBlocked: isRainingActive, lang, t }),
         tab === "harmonogram" && e(HarmonogramTab, { lang, t }),
         tab === "objekty" && e(ObjektyTab, { selectedAreaFilter, lang, t }),
